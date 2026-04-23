@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>날씨돌 vs 기상청 데이터 비교</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <span class="logo-icon">🌤</span>
+        <span class="logo-text">날씨돌</span>
+        <span class="logo-sub">기상 관측 비교</span>
+      </div>
+    </div>
+    <div class="header-center">
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        <span>LIVE 관측 중</span>
+      </div>
+      <div class="update-info">
+        날씨돌 마지막 업데이트: <span id="lastUpdate">--:--:--</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="accuracy-badge">
+        <span class="accuracy-icon">✓</span>
+        <span>5분 단위 정밀 관측</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Comparison Banner -->
+  <div class="comparison-banner">
+    <div class="banner-item nalssidol">
+      <div class="banner-label">날씨돌 관측소</div>
+      <div class="banner-freq">업데이트 주기: <strong>5분</strong></div>
+      <div class="banner-desc">현지 정밀 관측 데이터</div>
+    </div>
+    <div class="banner-vs">VS</div>
+    <div class="banner-item kma">
+      <div class="banner-label">기상청</div>
+      <div class="banner-freq">업데이트 주기: <strong>1시간</strong></div>
+      <div class="banner-desc">공식 발표 데이터</div>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-row">
+    <div class="summary-card nalssidol-card" id="card-temp">
+      <div class="card-source">날씨돌</div>
+      <div class="card-icon">🌡️</div>
+      <div class="card-value" id="nd-temp">--</div>
+      <div class="card-unit">°C</div>
+      <div class="card-label">온도</div>
+      <div class="card-kma">기상청: <span id="kma-temp">--</span>°C</div>
+    </div>
+    <div class="summary-card nalssidol-card" id="card-feel">
+      <div class="card-source">날씨돌</div>
+      <div class="card-icon">🤔</div>
+      <div class="card-value" id="nd-feel">--</div>
+      <div class="card-unit">°C</div>
+      <div class="card-label">체감온도</div>
+      <div class="card-kma">기상청: <span id="kma-feel">--</span>°C</div>
+    </div>
+    <div class="summary-card nalssidol-card" id="card-rain">
+      <div class="card-source">날씨돌</div>
+      <div class="card-icon">🌧️</div>
+      <div class="card-value" id="nd-rain">--</div>
+      <div class="card-unit">mm</div>
+      <div class="card-label">강수량</div>
+      <div class="card-kma">기상청: <span id="kma-rain">--</span>mm</div>
+    </div>
+    <div class="summary-card nalssidol-card" id="card-wind">
+      <div class="card-source">날씨돌</div>
+      <div class="card-icon">💨</div>
+      <div class="card-value" id="nd-wind">--</div>
+      <div class="card-unit">m/s</div>
+      <div class="card-label">풍속</div>
+      <div class="card-kma">기상청: <span id="kma-wind">--</span>m/s</div>
+    </div>
+    <div class="summary-card nalssidol-card" id="card-humid">
+      <div class="card-source">날씨돌</div>
+      <div class="card-icon">💧</div>
+      <div class="card-value" id="nd-humid">--</div>
+      <div class="card-unit">%</div>
+      <div class="card-label">습도</div>
+      <div class="card-kma">기상청: <span id="kma-humid">--</span>%</div>
+    </div>
+    <div class="summary-card nalssidol-card" id="card-uv">
+      <div class="card-source">날씨돌</div>
+      <div class="card-icon">☀️</div>
+      <div class="card-value" id="nd-uv">--</div>
+      <div class="card-unit">지수</div>
+      <div class="card-label">자외선</div>
+      <div class="card-kma">기상청: <span id="kma-uv">--</span></div>
+    </div>
+    <div class="summary-card nalssidol-card" id="card-press">
+      <div class="card-source">날씨돌</div>
+      <div class="card-icon">🔵</div>
+      <div class="card-value" id="nd-press">--</div>
+      <div class="card-unit">hPa</div>
+      <div class="card-label">기압</div>
+      <div class="card-kma">기상청: <span id="kma-press">--</span>hPa</div>
+    </div>
+  </div>
+
+  <!-- Charts Grid -->
+  <div class="charts-grid">
+    <div class="chart-panel large">
+      <div class="chart-header">
+        <div class="chart-title">🌡️ 온도 · 체감온도</div>
+        <div class="chart-legend">
+          <span class="legend-nd">● 날씨돌 (5분)</span>
+          <span class="legend-kma">● 기상청 (1시간)</span>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="tempChart"></canvas></div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-header">
+        <div class="chart-title">🌧️ 강수량</div>
+        <div class="chart-legend">
+          <span class="legend-nd">● 날씨돌</span>
+          <span class="legend-kma">● 기상청</span>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="rainChart"></canvas></div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-header">
+        <div class="chart-title">💨 풍속</div>
+        <div class="chart-legend">
+          <span class="legend-nd">● 날씨돌</span>
+          <span class="legend-kma">● 기상청</span>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="windChart"></canvas></div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-header">
+        <div class="chart-title">💧 습도</div>
+        <div class="chart-legend">
+          <span class="legend-nd">● 날씨돌</span>
+          <span class="legend-kma">● 기상청</span>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="humidChart"></canvas></div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-header">
+        <div class="chart-title">☀️ 자외선 지수</div>
+        <div class="chart-legend">
+          <span class="legend-nd">● 날씨돌</span>
+          <span class="legend-kma">● 기상청</span>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="uvChart"></canvas></div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-header">
+        <div class="chart-title">🔵 기압</div>
+        <div class="chart-legend">
+          <span class="legend-nd">● 날씨돌</span>
+          <span class="legend-kma">● 기상청</span>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="pressChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="timeline-section">
+    <div class="timeline-header">
+      <span class="timeline-title">📍 관측 타임라인 비교</span>
+      <span class="timeline-sub">날씨돌은 기상청 대비 <strong>12배</strong> 더 촘촘한 관측 데이터를 제공합니다</span>
+    </div>
+    <div class="timeline-container">
+      <div class="timeline-row">
+        <div class="timeline-label nalssidol-label">날씨돌<br><small>5분 간격</small></div>
+        <div class="timeline-dots" id="ndTimeline"></div>
+      </div>
+      <div class="timeline-row">
+        <div class="timeline-label kma-label">기상청<br><small>1시간 간격</small></div>
+        <div class="timeline-dots" id="kmaTimeline"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-info">
+      <span>📡 날씨돌 관측소 — 실시간 기상 모니터링 시스템</span>
+      <span>|</span>
+      <span>데이터 기준: 과거 6시간 ~ 현재</span>
+    </div>
+  </footer>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
