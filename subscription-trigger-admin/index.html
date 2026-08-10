@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>날씨돌 Admin · 구독 유도 트리거 관리</title>
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --surface:#ffffff;
+    --border:#e4e7ec;
+    --border-strong:#d0d5dd;
+    --text:#101828;
+    --text-secondary:#667085;
+    --text-tertiary:#98a2b3;
+    --primary:#2f5bff;
+    --primary-hover:#2447d6;
+    --primary-soft:#eef1ff;
+    --danger:#d92d20;
+    --danger-soft:#fef3f2;
+    --warning:#b54708;
+    --warning-soft:#fffaeb;
+    --warning-border:#fedf89;
+    --green-bg:#ecfdf3;
+    --green-text:#027a48;
+    --green-border:#abefc6;
+    --blue-bg:#eff8ff;
+    --blue-text:#175cd3;
+    --blue-border:#b2ddff;
+    --gray-bg:#f2f4f7;
+    --gray-text:#475467;
+    --gray-border:#eaecf0;
+    --red-bg:#fef3f2;
+    --red-text:#b42318;
+    --red-border:#fecdca;
+    --standard-bg:#eef2ff;
+    --standard-text:#3538cd;
+    --standard-border:#c7d7fe;
+    --premium-bg:#fff6ed;
+    --premium-text:#b93815;
+    --premium-border:#f9dbaf;
+    --radius:6px;
+    --shadow-sm:0 1px 2px rgba(16,24,40,0.05);
+    --shadow-md:0 4px 12px rgba(16,24,40,0.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-width:1280px;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+    font-size:13px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;}
+  ul{margin:0;padding:0;list-style:none;}
+
+  /* ---------- layout ---------- */
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{
+    width:236px;
+    flex:0 0 236px;
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    padding:20px 0;
+  }
+  .sidebar-logo{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    padding:0 20px 20px 20px;
+    border-bottom:1px solid var(--border);
+    margin-bottom:16px;
+  }
+  .sidebar-logo .name{font-size:15px;font-weight:700;color:var(--text);}
+  .sidebar-logo .tag{font-size:11px;color:var(--text-tertiary);}
+  .nav-group{padding:0 12px;margin-bottom:20px;}
+  .nav-group-title{
+    font-size:11px;
+    font-weight:600;
+    color:var(--text-tertiary);
+    padding:0 8px 6px 8px;
+    letter-spacing:.02em;
+  }
+  .nav-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 10px;
+    border-radius:var(--radius);
+    color:var(--text-secondary);
+    font-size:13px;
+    cursor:pointer;
+    margin-bottom:2px;
+  }
+  .nav-item:hover{background:var(--gray-bg);color:var(--text);}
+  .nav-item.active{background:var(--primary-soft);color:var(--primary);font-weight:600;}
+  .nav-item.disabled{cursor:not-allowed;color:var(--text-tertiary);}
+  .nav-item.disabled:hover{background:none;color:var(--text-tertiary);}
+  .nav-item .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.5;flex:0 0 auto;}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+  .view{flex:1;display:flex;flex-direction:column;min-height:0;}
+
+  /* ---------- typography / common ---------- */
+  .page-header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    padding:28px 32px 0 32px;
+  }
+  .page-title{font-size:20px;font-weight:700;color:var(--text);margin:0 0 6px 0;}
+  .page-desc{font-size:13px;color:var(--text-secondary);margin:0;}
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    height:34px;
+    padding:0 14px;
+    border-radius:var(--radius);
+    border:1px solid var(--border-strong);
+    background:var(--surface);
+    color:var(--text);
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .btn:hover{background:var(--gray-bg);}
+  .btn-primary{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .btn-primary:hover{background:var(--primary-hover);border-color:var(--primary-hover);}
+  .btn-secondary{background:var(--surface);}
+  .btn-danger{background:var(--danger);border-color:var(--danger);color:#fff;}
+  .btn-danger:hover{background:#b42318;border-color:#b42318;}
+  .btn-danger-outline{background:var(--surface);border-color:var(--red-border);color:var(--danger);}
+  .btn-danger-outline:hover{background:var(--danger-soft);}
+  .btn-sm{height:28px;padding:0 10px;font-size:12px;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    height:22px;
+    padding:0 8px;
+    border-radius:4px;
+    font-size:11.5px;
+    font-weight:600;
+    border:1px solid transparent;
+    white-space:nowrap;
+  }
+  .badge-green{background:var(--green-bg);color:var(--green-text);border-color:var(--green-border);}
+  .badge-blue{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-border);}
+  .badge-gray{background:var(--gray-bg);color:var(--gray-text);border-color:var(--gray-border);}
+  .badge-red{background:var(--red-bg);color:var(--red-text);border-color:var(--red-border);}
+  .badge-standard{background:var(--standard-bg);color:var(--standard-text);border-color:var(--standard-border);}
+  .badge-premium{background:var(--premium-bg);color:var(--premium-text);border-color:var(--premium-border);}
+
+  .toggle{
+    position:relative;
+    display:inline-block;
+    width:34px;
+    height:19px;
+    flex:0 0 auto;
+  }
+  .toggle input{opacity:0;width:0;height:0;}
+  .toggle-track{
+    position:absolute;inset:0;
+    background:var(--gray-border);
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .toggle-track:before{
+    content:"";
+    position:absolute;
+    left:2px;top:2px;
+    width:15px;height:15px;
+    background:#fff;
+    border-radius:50%;
+    box-shadow:var(--shadow-sm);
+    transition:transform .15s;
+  }
+  .toggle input:checked + .toggle-track{background:var(--primary);}
+  .toggle input:checked + .toggle-track:before{transform:translateX(15px);}
+
+  /* ---------- summary cards ---------- */
+  .summary-row{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    padding:20px 32px 0 32px;
+  }
+  .summary-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:16px 18px;
+  }
+  .summary-card .label{font-size:12px;color:var(--text-secondary);margin-bottom:8px;}
+  .summary-card .value{font-size:24px;font-weight:700;color:var(--text);}
+  .summary-card.running .value{color:var(--green-text);}
+  .summary-card.scheduled .value{color:var(--blue-text);}
+  .summary-card.off .value{color:var(--red-text);}
+
+  /* ---------- filters ---------- */
+  .filter-bar{
+    display:flex;
+    align-items:flex-end;
+    gap:10px;
+    margin:20px 32px 0 32px;
+    padding:16px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:8px;
+    flex-wrap:wrap;
+  }
+  .filter-field{display:flex;flex-direction:column;gap:6px;}
+  .filter-field label{font-size:11.5px;color:var(--text-secondary);font-weight:600;}
+  .filter-field input[type=text], .filter-field select{
+    height:32px;
+    border:1px solid var(--border-strong);
+    border-radius:var(--radius);
+    padding:0 10px;
+    font-size:13px;
+    background:var(--surface);
+    color:var(--text);
+    min-width:150px;
+  }
+  .filter-field input[type=text]{width:220px;}
+  .filter-actions{display:flex;gap:8px;margin-left:auto;}
+
+  /* ---------- table ---------- */
+  .table-wrap{
+    margin:16px 32px 32px 32px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow-x:auto;
+    overflow-y:hidden;
+  }
+  table{width:100%;min-width:1300px;border-collapse:collapse;table-layout:fixed;}
+  thead th{
+    text-align:left;
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--text-secondary);
+    background:var(--gray-bg);
+    padding:10px 12px;
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:11px 12px;
+    border-bottom:1px solid var(--border);
+    font-size:12.5px;
+    color:var(--text);
+    vertical-align:middle;
+    overflow:hidden;
+  }
+  tbody tr{cursor:pointer;}
+  tbody tr:hover{background:#fafbfc;}
+  tbody tr:last-child td{border-bottom:none;}
+  .cell-ellipsis{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    display:block;
+    max-width:100%;
+  }
+  .col-id{width:44px;}
+  .col-name{width:168px;}
+  .col-screen{width:68px;}
+  .col-trigger{width:150px;}
+  .col-type{width:68px;}
+  .col-product{width:76px;}
+  .col-paywall{width:132px;}
+  .col-target{width:112px;}
+  .col-period{width:136px;}
+  .col-freq{width:104px;}
+  .col-priority{width:52px;text-align:center;}
+  .col-status{width:70px;}
+  .col-manage{width:100px;}
+  td.col-priority{text-align:center;}
+  .row-manage{display:flex;align-items:center;gap:10px;}
+  .empty-row td{padding:48px 12px;text-align:center;color:var(--text-tertiary);font-size:13px;}
+
+  /* pin identifying + action columns so they stay reachable while the
+     dense table scrolls horizontally at 1280-1440px */
+  th.sticky-col, td.sticky-col{position:sticky;background:var(--surface);z-index:2;}
+  thead th.sticky-col{background:var(--gray-bg);z-index:3;}
+  tbody tr:hover td.sticky-col{background:#fafbfc;}
+  .sticky-id{left:0;}
+  .sticky-name{left:44px;box-shadow:2px 0 4px -2px rgba(16,24,40,0.12);}
+  .sticky-manage{right:0;box-shadow:-2px 0 4px -2px rgba(16,24,40,0.12);}
+
+  /* ---------- form view ---------- */
+  .form-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px 32px;
+    border-bottom:1px solid var(--border);
+    background:var(--surface);
+  }
+  .form-header-left{display:flex;flex-direction:column;gap:6px;}
+  .back-link{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    font-size:12.5px;
+    color:var(--text-secondary);
+    cursor:pointer;
+    width:fit-content;
+  }
+  .back-link:hover{color:var(--primary);}
+  .form-title{font-size:18px;font-weight:700;}
+
+  .form-body{
+    display:flex;
+    align-items:flex-start;
+    gap:24px;
+    padding:24px 32px 120px 32px;
+  }
+  .form-main{flex:0 0 66%;max-width:66%;display:flex;flex-direction:column;gap:16px;}
+  .form-side{flex:1;position:sticky;top:24px;}
+
+  .section-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:20px 22px;
+  }
+  .section-head{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;}
+  .section-num{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:20px;height:20px;
+    border-radius:50%;
+    background:var(--text);
+    color:#fff;
+    font-size:11px;
+    font-weight:700;
+    flex:0 0 auto;
+  }
+  .section-title{font-size:14px;font-weight:700;color:var(--text);}
+  .section-sub{font-size:12px;color:var(--text-secondary);}
+
+  .field{margin-bottom:16px;}
+  .field:last-child{margin-bottom:0;}
+  .field-row{display:flex;gap:16px;}
+  .field-row .field{flex:1;}
+  .field label.field-label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--text);
+    margin-bottom:6px;
+  }
+  .required-mark{color:var(--danger);margin-left:2px;}
+  .field .helper{font-size:11.5px;color:var(--text-tertiary);margin-top:5px;}
+  .field .error-text{font-size:11.5px;color:var(--danger);margin-top:5px;display:none;}
+  .field.has-error .error-text{display:block;}
+  .field.has-error input,.field.has-error select,.field.has-error textarea{border-color:var(--danger)!important;}
+  .field.has-error .card-select .card-option{border-color:var(--danger);}
+
+  input[type=text], input[type=number], input[type=datetime-local], select, textarea{
+    width:100%;
+    height:34px;
+    border:1px solid var(--border-strong);
+    border-radius:var(--radius);
+    padding:0 10px;
+    font-size:13px;
+    color:var(--text);
+    background:var(--surface);
+    font-family:inherit;
+  }
+  textarea{height:auto;padding:8px 10px;resize:vertical;min-height:64px;}
+  input:focus, select:focus, textarea:focus{outline:2px solid var(--primary-soft);border-color:var(--primary);}
+  input::placeholder, textarea::placeholder{color:var(--text-tertiary);}
+
+  .row-toggle{display:flex;align-items:center;justify-content:space-between;padding:2px 0;}
+  .row-toggle .toggle-copy .t{font-size:13px;font-weight:600;}
+  .row-toggle .toggle-copy .d{font-size:11.5px;color:var(--text-secondary);margin-top:2px;}
+
+  .checkbox-grid{display:flex;flex-direction:column;gap:2px;}
+  .checkbox-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 4px;
+    border-bottom:1px solid var(--gray-bg);
+  }
+  .checkbox-item:last-child{border-bottom:none;}
+  .checkbox-item input{width:15px;height:15px;}
+  .checkbox-item label{font-size:13px;cursor:pointer;}
+
+  .warning-box{
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+    background:var(--warning-soft);
+    border:1px solid var(--warning-border);
+    color:var(--warning);
+    border-radius:var(--radius);
+    padding:10px 12px;
+    font-size:12px;
+    margin-top:10px;
+  }
+  .warning-box .mark{font-weight:700;flex:0 0 auto;}
+
+  .radio-line{display:flex;gap:20px;align-items:center;height:34px;}
+  .radio-item{display:flex;align-items:center;gap:6px;}
+  .radio-item input{width:15px;height:15px;}
+  .radio-item label{font-size:13px;cursor:pointer;}
+
+  .freq-select-wrap{display:flex;gap:10px;align-items:flex-start;}
+  .freq-select-wrap select{flex:0 0 220px;}
+  .freq-sub{flex:1;}
+  .freq-note{
+    background:var(--gray-bg);
+    border-radius:var(--radius);
+    padding:9px 12px;
+    font-size:12px;
+    color:var(--text-secondary);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-height:34px;
+  }
+  .freq-number-row{display:flex;align-items:center;gap:8px;}
+  .freq-number-row input{width:90px;}
+  .freq-number-row span{font-size:12.5px;color:var(--text-secondary);white-space:nowrap;}
+
+  .card-select{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .card-select.two-col{grid-template-columns:repeat(2,1fr);}
+  .card-option{
+    border:1.5px solid var(--border);
+    border-radius:8px;
+    padding:14px 10px 12px 10px;
+    cursor:pointer;
+    text-align:center;
+    background:var(--surface);
+  }
+  .card-option:hover{border-color:var(--border-strong);}
+  .card-option.selected{border-color:var(--primary);background:var(--primary-soft);}
+  .card-option .icon-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:52px;
+    margin-bottom:10px;
+  }
+  .card-option .icon-wrap svg{width:44px;height:40px;}
+  .card-option .opt-title{font-size:12.5px;font-weight:600;color:var(--text);}
+
+  .product-card{
+    border:1.5px solid var(--border);
+    border-radius:8px;
+    padding:16px;
+    cursor:pointer;
+  }
+  .product-card:hover{border-color:var(--border-strong);}
+  .product-card.selected{border-color:var(--primary);background:var(--primary-soft);}
+  .product-card .p-name{font-size:14px;font-weight:700;margin-bottom:4px;}
+  .product-card .p-desc{font-size:12px;color:var(--text-secondary);}
+
+  .flow-diagram{
+    margin-top:16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    padding:12px 14px;
+    background:var(--gray-bg);
+    border-radius:var(--radius);
+  }
+  .flow-chip{
+    background:var(--surface);
+    border:1px solid var(--border-strong);
+    border-radius:999px;
+    padding:5px 12px;
+    font-size:12px;
+    font-weight:600;
+    color:var(--text);
+  }
+  .flow-chip.empty{color:var(--text-tertiary);font-weight:500;}
+  .flow-arrow{color:var(--text-tertiary);font-size:13px;}
+
+  .dropzone{
+    border:1.5px dashed var(--border-strong);
+    border-radius:var(--radius);
+    padding:22px;
+    text-align:center;
+    cursor:pointer;
+    color:var(--text-secondary);
+    font-size:12.5px;
+  }
+  .dropzone:hover{border-color:var(--primary);background:var(--primary-soft);}
+  .dropzone.filled{border-style:solid;border-color:var(--green-border);background:var(--green-bg);color:var(--green-text);}
+  .dropzone .dz-title{font-weight:600;margin-bottom:3px;color:var(--text);}
+  .dropzone.filled .dz-title{color:var(--green-text);}
+
+  .priority-hint{font-size:12px;color:var(--text-secondary);margin-top:6px;}
+
+  /* ---------- preview ---------- */
+  .preview-panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:20px;
+  }
+  .preview-panel h3{font-size:13.5px;font-weight:700;margin:0 0 4px 0;}
+  .preview-panel .preview-sub{font-size:11.5px;color:var(--text-secondary);margin-bottom:16px;}
+  .phone-frame{
+    width:100%;
+    max-width:260px;
+    margin:0 auto;
+    border:8px solid #1d2129;
+    border-radius:30px;
+    background:#1d2129;
+    box-shadow:var(--shadow-md);
+  }
+  .phone-screen{
+    background:#eef1f6;
+    border-radius:22px;
+    height:480px;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+  }
+  .phone-notch{
+    position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:70px;height:16px;background:#1d2129;border-radius:0 0 10px 10px;
+  }
+  .phone-bg-app{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg,#dfe7f5 0%,#eef1f6 60%);
+  }
+  .phone-bg-app .fake-line{height:8px;background:#d7dee8;border-radius:4px;margin:0 16px 8px 16px;}
+  .phone-bg-app .fake-line.short{width:40%;}
+  .phone-bg-app .fake-block{height:60px;background:#d7dee8;border-radius:8px;margin:16px;}
+
+  .sheet{
+    position:relative;
+    background:#fff;
+    border-radius:16px 16px 0 0;
+    padding:18px 16px 16px 16px;
+    box-shadow:0 -4px 16px rgba(0,0,0,.12);
+  }
+  .sheet.popup-center{
+    margin:auto 14px;
+    border-radius:14px;
+    align-self:center;
+  }
+  .sheet.fullpage-sheet{
+    position:absolute;inset:0;
+    border-radius:22px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:28px 20px;
+  }
+  .sheet-img{
+    height:96px;
+    border-radius:10px;
+    background:repeating-linear-gradient(45deg,#eef1ff,#eef1ff 8px,#e4e9ff 8px,#e4e9ff 16px);
+    margin-bottom:12px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-tertiary);
+    font-size:10.5px;
+  }
+  .sheet-title{font-size:14.5px;font-weight:700;color:#101828;margin-bottom:4px;line-height:1.35;}
+  .sheet-subtitle{font-size:11.5px;color:#667085;margin-bottom:14px;line-height:1.4;}
+  .sheet-cta{
+    background:var(--primary);
+    color:#fff;
+    text-align:center;
+    padding:11px;
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  .sheet-subcta{
+    text-align:center;
+    padding:6px;
+    font-size:11.5px;
+    color:var(--text-tertiary);
+  }
+  .sheet-badge-row{display:flex;justify-content:flex-end;margin-top:6px;}
+  .sheet-product-badge{
+    font-size:9.5px;
+    font-weight:700;
+    padding:2px 7px;
+    border-radius:4px;
+  }
+  .flow-preview{
+    position:absolute;inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    padding:24px;
+  }
+  .flow-preview .fp-chip{
+    background:#fff;
+    border-radius:8px;
+    padding:10px 16px;
+    font-size:12px;
+    font-weight:600;
+    color:var(--text);
+    box-shadow:var(--shadow-sm);
+    text-align:center;
+  }
+  .flow-preview .fp-arrow{color:var(--text-tertiary);font-size:16px;}
+  .preview-meta{
+    margin-top:14px;
+    font-size:11.5px;
+    color:var(--text-secondary);
+    display:flex;
+    justify-content:space-between;
+  }
+
+  /* ---------- sticky bottom actions ---------- */
+  .bottom-actions{
+    position:fixed;
+    left:236px;right:0;bottom:0;
+    background:var(--surface);
+    border-top:1px solid var(--border);
+    padding:14px 32px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    z-index:20;
+  }
+  .bottom-actions-right{display:flex;gap:8px;}
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:fixed;
+    bottom:28px;
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:#101828;
+    color:#fff;
+    padding:12px 20px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:500;
+    box-shadow:var(--shadow-md);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .18s, transform .18s;
+    z-index:100;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(16,24,40,.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:90;
+  }
+  .modal{
+    background:#fff;
+    border-radius:10px;
+    padding:24px;
+    width:380px;
+    box-shadow:var(--shadow-md);
+  }
+  .modal h3{font-size:15px;font-weight:700;margin:0 0 8px 0;}
+  .modal p{font-size:12.5px;color:var(--text-secondary);margin:0 0 20px 0;line-height:1.5;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="name">날씨돌 Admin</span>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">구독 관리</div>
+      <ul>
+        <li class="nav-item active" id="nav-trigger">
+          <span class="dot"></span>구독 유도 트리거 관리
+        </li>
+        <li class="nav-item disabled" id="nav-paywall">
+          <span class="dot"></span>Paywall 관리
+        </li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ===================== LIST VIEW ===================== -->
+    <section class="view" id="view-list">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">구독 유도 트리거 관리</h1>
+          <p class="page-desc">사용자의 행동과 상태에 따라 노출되는 구독 유도 메시지를 관리합니다.</p>
+        </div>
+        <button class="btn btn-primary" id="btn-new">+ 신규 트리거 등록</button>
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-card">
+          <div class="label">전체 트리거</div>
+          <div class="value" id="sum-total">0</div>
+        </div>
+        <div class="summary-card running">
+          <div class="label">운영 중</div>
+          <div class="value" id="sum-running">0</div>
+        </div>
+        <div class="summary-card scheduled">
+          <div class="label">운영 예정</div>
+          <div class="value" id="sum-scheduled">0</div>
+        </div>
+        <div class="summary-card off">
+          <div class="label">OFF</div>
+          <div class="value" id="sum-off">0</div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="filter-field">
+          <label>트리거명</label>
+          <input type="text" id="filter-name" placeholder="트리거명을 입력하세요">
+        </div>
+        <div class="filter-field">
+          <label>화면</label>
+          <select id="filter-screen">
+            <option value="">전체</option>
+            <option value="메인">메인</option>
+            <option value="알람">알람</option>
+            <option value="미니게임">미니게임</option>
+            <option value="마이페이지">마이페이지</option>
+            <option value="전체 서비스">전체 서비스</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label>대상 상품</label>
+          <select id="filter-product">
+            <option value="">전체</option>
+            <option value="STANDARD">STANDARD</option>
+            <option value="PREMIUM">PREMIUM</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label>상태</label>
+          <select id="filter-status">
+            <option value="">전체</option>
+            <option value="running">운영 중</option>
+            <option value="scheduled">운영 예정</option>
+            <option value="ended">종료</option>
+            <option value="off">OFF</option>
+          </select>
+        </div>
+        <div class="filter-actions">
+          <button class="btn btn-secondary" id="btn-reset">초기화</button>
+          <button class="btn btn-primary" id="btn-search">검색</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <colgroup>
+            <col class="col-id"><col class="col-name"><col class="col-screen"><col class="col-trigger">
+            <col class="col-type"><col class="col-product"><col class="col-paywall"><col class="col-target">
+            <col class="col-period"><col class="col-freq"><col class="col-priority"><col class="col-status"><col class="col-manage">
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="sticky-col sticky-id">ID</th><th class="sticky-col sticky-name">트리거명</th><th>화면</th><th>트리거 지점</th><th>노출 형태</th>
+              <th>대상 상품</th><th>연결 Paywall</th><th>대상 유저</th><th>노출 기간</th>
+              <th>빈도</th><th>우선순위</th><th>상태</th><th class="sticky-col sticky-manage">관리</th>
+            </tr>
+          </thead>
+          <tbody id="trigger-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== FORM VIEW ===================== -->
+    <section class="view" id="view-form" style="display:none;">
+      <div class="form-header">
+        <div class="form-header-left">
+          <span class="back-link" id="btn-back">&larr; 목록으로</span>
+          <span class="form-title" id="form-title">구독 유도 트리거 등록</span>
+        </div>
+        <button class="btn btn-danger-outline" id="btn-delete" style="display:none;">삭제</button>
+      </div>
+
+      <div class="form-body">
+        <div class="form-main">
+
+          <!-- 1. 기본 정보 -->
+          <div class="section-card">
+            <div class="section-head">
+              <span class="section-num">1</span>
+              <span class="section-title">기본 정보</span>
+            </div>
+            <div class="field" id="field-name">
+              <label class="field-label">트리거명<span class="required-mark">*</span></label>
+              <input type="text" id="f-name" placeholder="운영자가 식별할 수 있는 이름을 입력하세요">
+              <div class="helper">사용자에게 노출되지 않는 어드민 내부 관리용 이름입니다.</div>
+              <div class="error-text">트리거명을 입력해주세요.</div>
+            </div>
+            <div class="field">
+              <label class="field-label">운영 설명</label>
+              <textarea id="f-desc" placeholder="운영 목적이나 참고사항을 입력하세요"></textarea>
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <div class="row-toggle">
+                <div class="toggle-copy">
+                  <div class="t">사용 여부</div>
+                  <div class="d">OFF로 설정하면 즉시 앱 노출이 중단됩니다.</div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="f-enabled" checked>
+                  <span class="toggle-track"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. 트리거 설정 -->
+          <div class="section-card">
+            <div class="section-head">
+              <span class="section-num">2</span>
+              <span class="section-title">트리거 설정</span>
+              <span class="section-sub">사용자가 어떤 화면에서 어떤 행동을 했을 때 구독 유도를 시작할지 설정합니다.</span>
+            </div>
+            <div class="field-row">
+              <div class="field" id="field-screen">
+                <label class="field-label">화면<span class="required-mark">*</span></label>
+                <select id="f-screen">
+                  <option value="">화면을 선택하세요</option>
+                  <option value="메인">메인</option>
+                  <option value="알람">알람</option>
+                  <option value="미니게임">미니게임</option>
+                  <option value="마이페이지">마이페이지</option>
+                  <option value="전체 서비스">전체 서비스</option>
+                </select>
+                <div class="error-text">노출 화면을 선택해주세요.</div>
+              </div>
+              <div class="field" id="field-triggerPoint">
+                <label class="field-label">트리거 지점<span class="required-mark">*</span></label>
+                <select id="f-triggerPoint" disabled>
+                  <option value="">화면을 먼저 선택하세요</option>
+                </select>
+                <div class="helper">개발에서 지원하는 트리거 이벤트만 선택할 수 있습니다.</div>
+                <div class="error-text">트리거 지점을 선택해주세요.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. 대상 사용자 -->
+          <div class="section-card">
+            <div class="section-head">
+              <span class="section-num">3</span>
+              <span class="section-title">대상 사용자</span>
+              <span class="section-sub">현재 구독 상태를 기준으로 노출할 사용자를 지정합니다.</span>
+            </div>
+            <div class="field" id="field-targetUsers" style="margin-bottom:0;">
+              <div class="checkbox-grid" id="f-targetUsers">
+                <div class="checkbox-item">
+                  <input type="checkbox" id="tu-free" value="free" checked>
+                  <label for="tu-free">무료 회원</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="tu-standard_sub" value="standard_sub">
+                  <label for="tu-standard_sub">STANDARD 구독자</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="tu-premium_sub" value="premium_sub">
+                  <label for="tu-premium_sub">PREMIUM 구독자</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="tu-premium_trial" value="premium_trial">
+                  <label for="tu-premium_trial">PREMIUM 무료체험 중</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="tu-expired" value="expired">
+                  <label for="tu-expired">구독 만료 회원</label>
+                </div>
+              </div>
+              <div class="error-text">대상 사용자를 1개 이상 선택해주세요.</div>
+              <div class="warning-box" id="premium-warning" style="display:none;">
+                <span class="mark">주의</span>
+                <span>이미 PREMIUM 혜택을 이용 중인 사용자입니다. PREMIUM 가입 유도 대상으로 설정하는 것이 맞는지 확인해주세요.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. 노출 기간 -->
+          <div class="section-card">
+            <div class="section-head">
+              <span class="section-num">4</span>
+              <span class="section-title">노출 기간</span>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">시작 일시</label>
+                <input type="datetime-local" id="f-startAt">
+              </div>
+              <div class="field">
+                <label class="field-label">종료 설정</label>
+                <div class="radio-line">
+                  <div class="radio-item">
+                    <input type="radio" name="endMode" id="endMode-set" value="set" checked>
+                    <label for="endMode-set">종료일 지정</label>
+                  </div>
+                  <div class="radio-item">
+                    <input type="radio" name="endMode" id="endMode-none" value="none">
+                    <label for="endMode-none">종료 없음</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="field" id="field-endAt">
+              <label class="field-label">종료 일시</label>
+              <input type="datetime-local" id="f-endAt">
+              <div class="error-text">종료 일시는 시작 일시 이후로 설정해주세요.</div>
+            </div>
+          </div>
+
+          <!-- 5. 노출 빈도 -->
+          <div class="section-card">
+            <div class="section-head">
+              <span class="section-num">5</span>
+              <span class="section-title">사용자별 노출 빈도</span>
+              <span class="section-sub">동일 사용자에게 구독 유도 메시지가 반복 노출되는 빈도를 제한합니다.</span>
+            </div>
+            <div class="field" style="margin-bottom:10px;">
+              <div class="freq-select-wrap">
+                <select id="f-freqType">
+                  <option value="first_only">최초 1회</option>
+                  <option value="daily">일 단위</option>
+                  <option value="weekly">주 단위</option>
+                  <option value="monthly">월 단위</option>
+                  <option value="last_n_days">마지막 노출 후 N일</option>
+                  <option value="unlimited">제한 없음</option>
+                </select>
+                <div class="freq-sub" id="freq-sub"></div>
+              </div>
+            </div>
+            <div class="helper">빈도 제한은 회원 ID 기준으로 적용합니다.</div>
+          </div>
+
+          <!-- 6. 노출 콘텐츠 -->
+          <div class="section-card">
+            <div class="section-head">
+              <span class="section-num">6</span>
+              <span class="section-title">노출 콘텐츠</span>
+            </div>
+            <div class="field">
+              <label class="field-label">노출 형태<span class="required-mark">*</span></label>
+              <div class="card-select" id="f-displayType">
+                <div class="card-option" data-value="popup">
+                  <div class="icon-wrap">
+                    <svg viewBox="0 0 44 40" fill="none"><rect x="2" y="10" width="40" height="26" rx="3" stroke="#98a2b3" stroke-width="1.5"/><rect x="8" y="16" width="28" height="4" rx="1" fill="#d0d5dd"/><rect x="8" y="23" width="20" height="3" rx="1" fill="#e4e7ec"/><rect x="8" y="29" width="14" height="5" rx="1.5" fill="#98a2b3"/></svg>
+                  </div>
+                  <div class="opt-title">팝업</div>
+                </div>
+                <div class="card-option" data-value="bottomsheet">
+                  <div class="icon-wrap">
+                    <svg viewBox="0 0 44 40" fill="none"><rect x="2" y="2" width="40" height="36" rx="3" stroke="#e4e7ec" stroke-width="1.5"/><rect x="2" y="20" width="40" height="18" rx="3" stroke="#98a2b3" stroke-width="1.5" fill="#fff"/><rect x="17" y="23" width="10" height="2.5" rx="1.2" fill="#d0d5dd"/><rect x="9" y="29" width="26" height="5" rx="1.5" fill="#98a2b3"/></svg>
+                  </div>
+                  <div class="opt-title">바텀시트</div>
+                </div>
+                <div class="card-option" data-value="fullpage">
+                  <div class="icon-wrap">
+                    <svg viewBox="0 0 44 40" fill="none"><rect x="2" y="2" width="40" height="36" rx="3" stroke="#98a2b3" stroke-width="1.5" fill="#fff"/><rect x="8" y="9" width="28" height="10" rx="2" fill="#e4e7ec"/><rect x="8" y="23" width="20" height="3" rx="1" fill="#e4e7ec"/><rect x="8" y="29" width="28" height="5" rx="1.5" fill="#98a2b3"/></svg>
+                  </div>
+                  <div class="opt-title">풀페이지</div>
+                </div>
+                <div class="card-option" data-value="paywall_direct">
+                  <div class="icon-wrap">
+                    <svg viewBox="0 0 44 40" fill="none"><rect x="2" y="9" width="16" height="22" rx="2.5" stroke="#98a2b3" stroke-width="1.5" fill="#fff"/><path d="M22 20H38M38 20L32 14M38 20L32 26" stroke="#98a2b3" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                  <div class="opt-title">Paywall 바로 이동</div>
+                </div>
+              </div>
+            </div>
+
+            <div id="popup-content-fields">
+              <div class="field" id="field-popupTitle">
+                <label class="field-label">타이틀<span class="required-mark">*</span></label>
+                <input type="text" id="f-popupTitle" placeholder="광고 없이 날씨돌을 이용해보세요">
+                <div class="error-text">타이틀을 입력해주세요.</div>
+              </div>
+              <div class="field">
+                <label class="field-label">서브 타이틀</label>
+                <input type="text" id="f-popupSubtitle" placeholder="STANDARD 멤버십으로 광고를 제거할 수 있어요.">
+              </div>
+              <div class="field">
+                <label class="field-label">이미지</label>
+                <div class="dropzone" id="f-popupImage">
+                  <div class="dz-title">이미지 업로드</div>
+                  <div>클릭하여 파일을 선택하세요 (프로토타입 · 실제 업로드 없음)</div>
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field" id="field-cta">
+                  <label class="field-label">CTA 문구<span class="required-mark">*</span></label>
+                  <input type="text" id="f-cta" placeholder="광고 없이 이용하기">
+                  <div class="error-text">CTA 문구를 입력해주세요.</div>
+                </div>
+                <div class="field">
+                  <label class="field-label">보조 CTA</label>
+                  <input type="text" id="f-subCta" placeholder="나중에">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7. 상품 / Paywall -->
+          <div class="section-card">
+            <div class="section-head">
+              <span class="section-num">7</span>
+              <span class="section-title">상품 / Paywall 설정</span>
+            </div>
+            <div class="field" id="field-product">
+              <label class="field-label">대상 상품<span class="required-mark">*</span></label>
+              <div class="card-select two-col" id="f-product">
+                <div class="product-card" data-value="STANDARD">
+                  <div class="p-name">STANDARD</div>
+                  <div class="p-desc">광고 제거</div>
+                </div>
+                <div class="product-card" data-value="PREMIUM">
+                  <div class="p-name">PREMIUM</div>
+                  <div class="p-desc">프리미엄 콘텐츠 및 추가 혜택</div>
+                </div>
+              </div>
+              <div class="error-text">대상 상품을 선택해주세요.</div>
+            </div>
+            <div class="field" id="field-paywall" style="margin-bottom:0;">
+              <label class="field-label">연결 Paywall<span class="required-mark">*</span></label>
+              <select id="f-paywall" disabled>
+                <option value="">상품을 먼저 선택하세요</option>
+              </select>
+              <div class="error-text">연결할 Paywall을 선택해주세요.</div>
+              <div class="flow-diagram" id="flow-diagram"></div>
+            </div>
+          </div>
+
+          <!-- 8. 우선순위 -->
+          <div class="section-card">
+            <div class="section-head">
+              <span class="section-num">8</span>
+              <span class="section-title">우선순위</span>
+            </div>
+            <div class="field" style="max-width:160px;margin-bottom:0;">
+              <label class="field-label">Priority</label>
+              <input type="number" id="f-priority" min="1" value="1">
+              <div class="priority-hint">동일한 시점에 여러 구독 유도 트리거를 만족한 경우 숫자가 낮은 트리거를 먼저 노출합니다. (Priority 1 &gt; Priority 2 &gt; Priority 3)</div>
+              <div class="warning-box" id="priority-warning" style="display:none;">
+                <span class="mark">주의</span>
+                <span>동일 화면에서 같은 우선순위를 사용하는 트리거가 있습니다.</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 9. 미리보기 -->
+        <div class="form-side">
+          <div class="preview-panel">
+            <h3>앱 노출 미리보기</h3>
+            <div class="preview-sub">입력한 콘텐츠가 실시간으로 반영됩니다.</div>
+            <div class="phone-frame">
+              <div class="phone-screen" id="phone-screen"></div>
+            </div>
+            <div class="preview-meta">
+              <span id="preview-type-label">팝업</span>
+              <span id="preview-product-label">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-actions">
+        <button class="btn btn-secondary" id="btn-cancel">취소</button>
+        <div class="bottom-actions-right">
+          <button class="btn btn-primary" id="btn-save">등록</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div class="modal-overlay" id="confirmOverlay" style="display:none;">
+  <div class="modal">
+    <h3 id="confirmTitle">트리거를 삭제하시겠습니까?</h3>
+    <p id="confirmDesc">삭제한 트리거는 더 이상 앱에 노출되지 않습니다.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="confirmCancelBtn">취소</button>
+      <button class="btn btn-danger" id="confirmOkBtn">삭제</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+   * Static reference data (trigger events are dev-defined; ops
+   * users may only pick from these lists, never free-type one)
+   * ============================================================ */
+  var TRIGGER_POINTS = {
+    "메인": [
+      { value:"app_open_5", label:"APP OPEN 횟수 5번째" },
+      { value:"main_enter", label:"메인 화면 진입" }
+    ],
+    "알람": [
+      { value:"alarm_enter_first", label:"알람 페이지 최초 진입" },
+      { value:"alarm_bg_lifetime_ad", label:"유료 알람 배경화면에서 광고보고 평생 소장하기 클릭" },
+      { value:"luck_alarm_enter", label:"행운 알람 영역 진입" }
+    ],
+    "미니게임": [
+      { value:"game_end_first", label:"첫 게임 종료" },
+      { value:"game_end_ad_retry", label:"첫 게임 종료 후 광고 보고 재도전 CTA 클릭" }
+    ],
+    "마이페이지": [
+      { value:"mypage_enter", label:"마이페이지 진입" }
+    ],
+    "전체 서비스": [
+      { value:"non_subscriber", label:"멤버십을 구독하지 않은 회원" },
+      { value:"app_open", label:"APP OPEN" }
+    ]
+  };
+
+  var TARGET_USER_LABELS = {
+    free:"무료 회원",
+    standard_sub:"STANDARD 구독자",
+    premium_sub:"PREMIUM 구독자",
+    premium_trial:"PREMIUM 무료체험 중",
+    expired:"구독 만료 회원"
+  };
+  var TARGET_USER_ORDER = ["free","standard_sub","premium_sub","premium_trial","expired"];
+
+  var PAYWALLS = {
+    STANDARD:["Standard 광고제거 Paywall","Standard 프로모션 Paywall"],
+    PREMIUM:["Premium 기본 Paywall","Premium 행운알람 Paywall","Premium 프로모션 Paywall"]
+  };
+
+  var DISPLAY_TYPE_LABELS = {
+    popup:"팝업", bottomsheet:"바텀시트", fullpage:"풀페이지", paywall_direct:"Paywall 바로 이동"
+  };
+
+  var FREQ_LABELS = {
+    first_only:"최초 1회", daily:"일 단위", weekly:"주 단위", monthly:"월 단위",
+    last_n_days:"마지막 노출 후 N일", unlimited:"제한 없음"
+  };
+
+  var STATUS_LABEL = { running:"운영 중", scheduled:"운영 예정", ended:"종료", off:"OFF" };
+  var STATUS_BADGE_CLASS = { running:"badge-green", scheduled:"badge-blue", ended:"badge-gray", off:"badge-red" };
+
+  /* ============================================================
+   * Mock data
+   * ============================================================ */
+  var triggers = [
+    {
+      id:1, name:"메인 5회 진입 프리미엄 유도", description:"신규 무료 회원의 5회차 앱 진입 시 프리미엄 업셀을 시도합니다.",
+      enabled:true, screen:"메인", triggerPoint:"app_open_5",
+      targetUsers:["free"], startAt:"2026-01-05T00:00", hasEndDate:false, endAt:"",
+      freqType:"first_only", freqValue:null,
+      displayType:"fullpage",
+      popupTitle:"프리미엄으로 더 많은 날씨 정보를 확인해보세요", popupSubtitle:"초정밀 예보와 프리미엄 테마를 만나보세요.",
+      popupImage:null, cta:"프리미엄 시작하기", subCta:"나중에",
+      product:"PREMIUM", paywall:"Premium 기본 Paywall", priority:1
+    },
+    {
+      id:2, name:"미니게임 재도전 광고제거 유도", description:"",
+      enabled:true, screen:"미니게임", triggerPoint:"game_end_ad_retry",
+      targetUsers:["free"], startAt:"2026-02-01T00:00", hasEndDate:false, endAt:"",
+      freqType:"last_n_days", freqValue:3,
+      displayType:"popup",
+      popupTitle:"광고 없이 게임을 즐겨보세요", popupSubtitle:"STANDARD 멤버십으로 광고를 제거할 수 있어요.",
+      popupImage:null, cta:"광고 없이 이용하기", subCta:"나중에",
+      product:"STANDARD", paywall:"Standard 광고제거 Paywall", priority:2
+    },
+    {
+      id:3, name:"알람 진입 프리미엄 유도", description:"",
+      enabled:true, screen:"알람", triggerPoint:"alarm_enter_first",
+      targetUsers:["free"], startAt:"2026-01-10T00:00", hasEndDate:false, endAt:"",
+      freqType:"first_only", freqValue:null,
+      displayType:"popup",
+      popupTitle:"행운을 부르는 프리미엄 알람", popupSubtitle:"매일 다른 행운 메시지를 받아보세요.",
+      popupImage:null, cta:"프리미엄 알람 시작하기", subCta:"다음에",
+      product:"PREMIUM", paywall:"Premium 행운알람 Paywall", priority:1
+    },
+    {
+      id:4, name:"알람 배경 평생소장 광고제거 유도", description:"",
+      enabled:true, screen:"알람", triggerPoint:"alarm_bg_lifetime_ad",
+      targetUsers:["free"], startAt:"2026-01-20T00:00", hasEndDate:false, endAt:"",
+      freqType:"last_n_days", freqValue:2,
+      displayType:"popup",
+      popupTitle:"광고 없이 평생 소장하세요", popupSubtitle:"STANDARD 멤버십으로 배경을 광고 없이 소장할 수 있어요.",
+      popupImage:null, cta:"광고 없이 소장하기", subCta:"나중에",
+      product:"STANDARD", paywall:"Standard 광고제거 Paywall", priority:2
+    },
+    {
+      id:5, name:"미구독 회원 프리미엄 유도", description:"",
+      enabled:true, screen:"전체 서비스", triggerPoint:"non_subscriber",
+      targetUsers:["free"], startAt:"2026-01-01T00:00", hasEndDate:false, endAt:"",
+      freqType:"last_n_days", freqValue:3,
+      displayType:"popup",
+      popupTitle:"날씨돌 프리미엄을 만나보세요", popupSubtitle:"광고 제거는 물론 다양한 프리미엄 혜택을 누려보세요.",
+      popupImage:null, cta:"프리미엄 알아보기", subCta:"나중에",
+      product:"PREMIUM", paywall:"Premium 기본 Paywall", priority:3
+    },
+    {
+      id:6, name:"행운 알람 프리미엄 프로모션", description:"가을 시즌 프로모션. 알람 화면 Priority 1과 중복 예정.",
+      enabled:true, screen:"알람", triggerPoint:"luck_alarm_enter",
+      targetUsers:["free","premium_trial"], startAt:"2026-09-01T00:00", hasEndDate:true, endAt:"2026-09-30T23:59",
+      freqType:"first_only", freqValue:null,
+      displayType:"popup",
+      popupTitle:"행운 알람 프리미엄 프로모션", popupSubtitle:"가을맞이 특별 혜택을 놓치지 마세요.",
+      popupImage:null, cta:"지금 확인하기", subCta:"나중에",
+      product:"PREMIUM", paywall:"Premium 프로모션 Paywall", priority:1
+    },
+    {
+      id:7, name:"가입 유도 종료 프로모션", description:"겨울 프로모션. 이미 종료됨.",
+      enabled:true, screen:"전체 서비스", triggerPoint:"app_open",
+      targetUsers:["expired"], startAt:"2025-12-01T00:00", hasEndDate:true, endAt:"2026-01-31T23:59",
+      freqType:"last_n_days", freqValue:7,
+      displayType:"bottomsheet",
+      popupTitle:"다시 만나서 반가워요", popupSubtitle:"놓친 혜택을 다시 받아보세요.",
+      popupImage:null, cta:"다시 시작하기", subCta:"나중에",
+      product:"STANDARD", paywall:"Standard 프로모션 Paywall", priority:5
+    },
+    {
+      id:8, name:"마이페이지 Paywall 직행 테스트", description:"현재 OFF 상태로 운영 중지된 트리거 샘플.",
+      enabled:false, screen:"마이페이지", triggerPoint:"mypage_enter",
+      targetUsers:["free"], startAt:"2026-03-01T00:00", hasEndDate:false, endAt:"",
+      freqType:"unlimited", freqValue:null,
+      displayType:"paywall_direct",
+      popupTitle:"", popupSubtitle:"", popupImage:null, cta:"", subCta:"",
+      product:"STANDARD", paywall:"Standard 프로모션 Paywall", priority:1
+    }
+  ];
+  var nextId = 9;
+
+  /* ============================================================
+   * Helpers
+   * ============================================================ */
+  function computeStatus(t, now){
+    now = now || new Date();
+    if (!t.enabled) return "off";
+    var start = new Date(t.startAt);
+    if (now < start) return "scheduled";
+    if (t.hasEndDate && t.endAt){
+      var end = new Date(t.endAt);
+      if (now > end) return "ended";
+    }
+    return "running";
+  }
+
+  function fmtDT(v){
+    if (!v) return "";
+    var s = v.replace("T"," ");
+    return s.slice(0,16).replace(/-/g,".");
+  }
+
+  function fmtPeriod(t){
+    var start = fmtDT(t.startAt) || "미설정";
+    if (t.hasEndDate && t.endAt) return start + " ~ " + fmtDT(t.endAt);
+    return start + " ~ 종료없음";
+  }
+
+  function fmtFreq(t){
+    switch(t.freqType){
+      case "first_only": return "최초 1회";
+      case "daily": return (t.freqValue||1) + "회 / Day";
+      case "weekly": return (t.freqValue||1) + "회 / Week";
+      case "monthly": return (t.freqValue||1) + "회 / Month";
+      case "last_n_days": return "마지막 노출 후 " + (t.freqValue||1) + "일";
+      case "unlimited": return "제한 없음";
+      default: return "-";
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function showToast(msg){
+    var el = document.getElementById("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ el.classList.remove("show"); }, 2400);
+  }
+
+  /* ============================================================
+   * List view rendering
+   * ============================================================ */
+  var currentFilters = { name:"", screen:"", product:"", status:"" };
+
+  function renderSummary(){
+    var total = triggers.length, running=0, scheduled=0, off=0;
+    triggers.forEach(function(t){
+      var s = computeStatus(t);
+      if (s==="running") running++;
+      else if (s==="scheduled") scheduled++;
+      else if (s==="off") off++;
+    });
+    document.getElementById("sum-total").textContent = total;
+    document.getElementById("sum-running").textContent = running;
+    document.getElementById("sum-scheduled").textContent = scheduled;
+    document.getElementById("sum-off").textContent = off;
+  }
+
+  function getFilteredTriggers(){
+    return triggers.filter(function(t){
+      if (currentFilters.name && t.name.indexOf(currentFilters.name) === -1) return false;
+      if (currentFilters.screen && t.screen !== currentFilters.screen) return false;
+      if (currentFilters.product && t.product !== currentFilters.product) return false;
+      if (currentFilters.status && computeStatus(t) !== currentFilters.status) return false;
+      return true;
+    });
+  }
+
+  function renderTable(){
+    var tbody = document.getElementById("trigger-tbody");
+    var list = getFilteredTriggers();
+    if (list.length === 0){
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="13">조건에 맞는 트리거가 없습니다.</td></tr>';
+      return;
+    }
+    var rows = list.map(function(t){
+      var status = computeStatus(t);
+      var targetLabel = t.targetUsers.map(function(v){ return TARGET_USER_LABELS[v]; }).join(", ");
+      var triggerLabel = (TRIGGER_POINTS[t.screen]||[]).reduce(function(acc,o){ return o.value===t.triggerPoint ? o.label : acc; }, t.triggerPoint);
+      var productBadgeClass = t.product === "PREMIUM" ? "badge-premium" : "badge-standard";
+      return '' +
+        '<tr data-id="'+t.id+'">' +
+          '<td class="sticky-col sticky-id">'+t.id+'</td>' +
+          '<td class="sticky-col sticky-name" title="'+escapeHtml(t.name)+'"><span class="cell-ellipsis">'+escapeHtml(t.name)+'</span></td>' +
+          '<td>'+escapeHtml(t.screen)+'</td>' +
+          '<td title="'+escapeHtml(triggerLabel)+'"><span class="cell-ellipsis">'+escapeHtml(triggerLabel)+'</span></td>' +
+          '<td>'+DISPLAY_TYPE_LABELS[t.displayType]+'</td>' +
+          '<td><span class="badge '+productBadgeClass+'">'+t.product+'</span></td>' +
+          '<td title="'+escapeHtml(t.paywall)+'"><span class="cell-ellipsis">'+escapeHtml(t.paywall)+'</span></td>' +
+          '<td title="'+escapeHtml(targetLabel)+'"><span class="cell-ellipsis">'+escapeHtml(targetLabel)+'</span></td>' +
+          '<td><span class="cell-ellipsis">'+fmtPeriod(t)+'</span></td>' +
+          '<td><span class="cell-ellipsis">'+fmtFreq(t)+'</span></td>' +
+          '<td class="col-priority">'+t.priority+'</td>' +
+          '<td><span class="badge '+STATUS_BADGE_CLASS[status]+'">'+STATUS_LABEL[status]+'</span></td>' +
+          '<td class="sticky-col sticky-manage">' +
+            '<div class="row-manage">' +
+              '<label class="toggle" title="ON/OFF">' +
+                '<input type="checkbox" class="row-toggle-input" data-id="'+t.id+'" '+(t.enabled?"checked":"")+'>' +
+                '<span class="toggle-track"></span>' +
+              '</label>' +
+              '<button class="btn btn-sm btn-secondary row-edit-btn" data-id="'+t.id+'">수정</button>' +
+            '</div>' +
+          '</td>' +
+        '</tr>';
+    }).join("");
+    tbody.innerHTML = rows;
+
+    tbody.querySelectorAll(".row-toggle-input").forEach(function(inp){
+      inp.addEventListener("click", function(e){ e.stopPropagation(); });
+      inp.addEventListener("change", function(){
+        var id = Number(this.dataset.id);
+        var t = triggers.find(function(x){ return x.id === id; });
+        if (t){ t.enabled = this.checked; }
+        renderSummary();
+        renderTable();
+      });
+    });
+    tbody.querySelectorAll(".row-edit-btn").forEach(function(btn){
+      btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        openEditForm(Number(this.dataset.id));
+      });
+    });
+    tbody.querySelectorAll("tr[data-id]").forEach(function(tr){
+      tr.addEventListener("click", function(e){
+        if (e.target.closest(".row-manage")) return;
+        openEditForm(Number(this.dataset.id));
+      });
+    });
+  }
+
+  function refreshList(){
+    renderSummary();
+    renderTable();
+  }
+
+  /* filters wiring */
+  document.getElementById("btn-search").addEventListener("click", function(){
+    currentFilters.name = document.getElementById("filter-name").value.trim();
+    currentFilters.screen = document.getElementById("filter-screen").value;
+    currentFilters.product = document.getElementById("filter-product").value;
+    currentFilters.status = document.getElementById("filter-status").value;
+    renderTable();
+  });
+  document.getElementById("filter-name").addEventListener("keydown", function(e){
+    if (e.key === "Enter") document.getElementById("btn-search").click();
+  });
+  document.getElementById("btn-reset").addEventListener("click", function(){
+    document.getElementById("filter-name").value = "";
+    document.getElementById("filter-screen").value = "";
+    document.getElementById("filter-product").value = "";
+    document.getElementById("filter-status").value = "";
+    currentFilters = { name:"", screen:"", product:"", status:"" };
+    renderTable();
+  });
+
+  /* ============================================================
+   * View switching
+   * ============================================================ */
+  function showView(name){
+    document.getElementById("view-list").style.display = (name==="list") ? "flex" : "none";
+    document.getElementById("view-form").style.display = (name==="form") ? "flex" : "none";
+    window.scrollTo(0,0);
+  }
+
+  document.getElementById("nav-trigger").addEventListener("click", function(){
+    showView("list");
+  });
+  document.getElementById("nav-paywall").addEventListener("click", function(){
+    showToast("준비 중인 기능입니다.");
+  });
+
+  /* ============================================================
+   * Form view
+   * ============================================================ */
+  var editingId = null;
+  var formState = null;
+
+  function defaultFormState(){
+    var now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    var startAt = now.toISOString().slice(0,16);
+    return {
+      name:"", description:"", enabled:true,
+      screen:"", triggerPoint:"",
+      targetUsers:["free"],
+      startAt:startAt, hasEndDate:true, endAt:"",
+      freqType:"first_only", freqValue:null,
+      displayType:"popup",
+      popupTitle:"", popupSubtitle:"", popupImage:null, cta:"", subCta:"",
+      product:"", paywall:"", priority:1
+    };
+  }
+
+  function cloneTriggerToForm(t){
+    return {
+      name:t.name, description:t.description||"", enabled:t.enabled,
+      screen:t.screen, triggerPoint:t.triggerPoint,
+      targetUsers:t.targetUsers.slice(),
+      startAt:t.startAt, hasEndDate:t.hasEndDate, endAt:t.endAt||"",
+      freqType:t.freqType, freqValue:t.freqValue,
+      displayType:t.displayType,
+      popupTitle:t.popupTitle||"", popupSubtitle:t.popupSubtitle||"", popupImage:t.popupImage||null,
+      cta:t.cta||"", subCta:t.subCta||"",
+      product:t.product, paywall:t.paywall, priority:t.priority
+    };
+  }
+
+  function openCreateForm(){
+    editingId = null;
+    formState = defaultFormState();
+    document.getElementById("form-title").textContent = "구독 유도 트리거 등록";
+    document.getElementById("btn-save").textContent = "등록";
+    document.getElementById("btn-delete").style.display = "none";
+    populateForm();
+    clearAllErrors();
+    showView("form");
+  }
+
+  function openEditForm(id){
+    var t = triggers.find(function(x){ return x.id === id; });
+    if (!t) return;
+    editingId = id;
+    formState = cloneTriggerToForm(t);
+    document.getElementById("form-title").textContent = "구독 유도 트리거 수정";
+    document.getElementById("btn-save").textContent = "변경사항 저장";
+    document.getElementById("btn-delete").style.display = "inline-flex";
+    populateForm();
+    clearAllErrors();
+    showView("form");
+  }
+
+  document.getElementById("btn-new").addEventListener("click", openCreateForm);
+  document.getElementById("btn-back").addEventListener("click", function(){ showView("list"); });
+  document.getElementById("btn-cancel").addEventListener("click", function(){ showView("list"); });
+
+  /* ---- populate static form controls from formState ---- */
+  function populateTriggerPointOptions(){
+    var sel = document.getElementById("f-triggerPoint");
+    var opts = TRIGGER_POINTS[formState.screen] || [];
+    if (!formState.screen){
+      sel.disabled = true;
+      sel.innerHTML = '<option value="">화면을 먼저 선택하세요</option>';
+      return;
+    }
+    sel.disabled = false;
+    sel.innerHTML = '<option value="">트리거 지점을 선택하세요</option>' +
+      opts.map(function(o){
+        var sel2 = (o.value === formState.triggerPoint) ? " selected" : "";
+        return '<option value="'+o.value+'"'+sel2+'>'+escapeHtml(o.label)+'</option>';
+      }).join("");
+  }
+
+  function populatePaywallOptions(){
+    var sel = document.getElementById("f-paywall");
+    var opts = formState.product ? (PAYWALLS[formState.product]||[]) : [];
+    if (!formState.product){
+      sel.disabled = true;
+      sel.innerHTML = '<option value="">상품을 먼저 선택하세요</option>';
+      return;
+    }
+    sel.disabled = false;
+    sel.innerHTML = '<option value="">Paywall을 선택하세요</option>' +
+      opts.map(function(name){
+        var sel2 = (name === formState.paywall) ? " selected" : "";
+        return '<option value="'+escapeHtml(name)+'"'+sel2+'>'+escapeHtml(name)+'</option>';
+      }).join("");
+  }
+
+  function populateFreqSub(){
+    var wrap = document.getElementById("freq-sub");
+    var v = formState.freqValue;
+    switch(formState.freqType){
+      case "first_only":
+        wrap.innerHTML = '<div class="freq-note">사용자에게 생애 최초 1회만 노출</div>';
+        break;
+      case "daily":
+        wrap.innerHTML = '<div class="freq-number-row"><input type="number" min="1" id="f-freqValue" value="'+(v||1)+'"><span>회 / Day</span></div>';
+        break;
+      case "weekly":
+        wrap.innerHTML = '<div class="freq-number-row"><input type="number" min="1" id="f-freqValue" value="'+(v||1)+'"><span>회 / Week</span></div>';
+        break;
+      case "monthly":
+        wrap.innerHTML = '<div class="freq-number-row"><input type="number" min="1" id="f-freqValue" value="'+(v||1)+'"><span>회 / Month</span></div>';
+        break;
+      case "last_n_days":
+        wrap.innerHTML = '<div class="freq-number-row"><input type="number" min="1" id="f-freqValue" value="'+(v||1)+'"><span>일이 지나면 다시 노출 가능</span></div>';
+        break;
+      case "unlimited":
+        wrap.innerHTML = '<div class="warning-box" style="margin-top:0;"><span class="mark">주의</span><span>트리거 조건을 만족할 때마다 노출됩니다. 사용자 피로도가 높아질 수 있습니다.</span></div>';
+        break;
+    }
+    var input = document.getElementById("f-freqValue");
+    if (input){
+      input.addEventListener("input", function(){
+        formState.freqValue = Number(this.value) || 1;
+      });
+    }
+  }
+
+  function updatePremiumWarning(){
+    var warn = document.getElementById("premium-warning");
+    var show = formState.product === "PREMIUM" && formState.targetUsers.indexOf("premium_sub") !== -1;
+    warn.style.display = show ? "flex" : "none";
+  }
+
+  function updatePriorityWarning(){
+    var warn = document.getElementById("priority-warning");
+    var dup = triggers.some(function(t){
+      return t.id !== editingId && t.screen === formState.screen && Number(t.priority) === Number(formState.priority) && formState.screen;
+    });
+    warn.style.display = dup ? "flex" : "none";
+  }
+
+  function updateFlowDiagram(){
+    var el = document.getElementById("flow-diagram");
+    var triggerLabel = "-";
+    if (formState.screen && formState.triggerPoint){
+      var opts = TRIGGER_POINTS[formState.screen] || [];
+      var found = opts.find(function(o){ return o.value === formState.triggerPoint; });
+      triggerLabel = found ? found.label : "-";
+    }
+    var productLabel = formState.product || "-";
+    var paywallLabel = formState.paywall || "-";
+    function chip(text){
+      var empty = (text === "-");
+      return '<span class="flow-chip'+(empty?" empty":"")+'">'+escapeHtml(text)+'</span>';
+    }
+    el.innerHTML = chip(triggerLabel) + '<span class="flow-arrow">&rarr;</span>' + chip(productLabel) + '<span class="flow-arrow">&rarr;</span>' + chip(paywallLabel);
+  }
+
+  function populateForm(){
+    document.getElementById("f-name").value = formState.name;
+    document.getElementById("f-desc").value = formState.description;
+    document.getElementById("f-enabled").checked = formState.enabled;
+
+    document.getElementById("f-screen").value = formState.screen;
+    populateTriggerPointOptions();
+
+    TARGET_USER_ORDER.forEach(function(v){
+      document.getElementById("tu-"+v).checked = formState.targetUsers.indexOf(v) !== -1;
+    });
+
+    document.getElementById("f-startAt").value = formState.startAt;
+    document.getElementById("endMode-set").checked = formState.hasEndDate;
+    document.getElementById("endMode-none").checked = !formState.hasEndDate;
+    document.getElementById("f-endAt").value = formState.endAt;
+    document.getElementById("field-endAt").style.display = formState.hasEndDate ? "block" : "none";
+
+    document.getElementById("f-freqType").value = formState.freqType;
+    populateFreqSub();
+
+    document.querySelectorAll("#f-displayType .card-option").forEach(function(el){
+      el.classList.toggle("selected", el.dataset.value === formState.displayType);
+    });
+    document.getElementById("popup-content-fields").style.display = (formState.displayType === "paywall_direct") ? "none" : "block";
+
+    document.getElementById("f-popupTitle").value = formState.popupTitle;
+    document.getElementById("f-popupSubtitle").value = formState.popupSubtitle;
+    document.getElementById("f-cta").value = formState.cta;
+    document.getElementById("f-subCta").value = formState.subCta;
+    var dz = document.getElementById("f-popupImage");
+    if (formState.popupImage){
+      dz.classList.add("filled");
+      dz.innerHTML = '<div class="dz-title">이미지 선택됨</div><div>'+escapeHtml(formState.popupImage)+' &middot; 다시 클릭하여 변경</div>';
+    } else {
+      dz.classList.remove("filled");
+      dz.innerHTML = '<div class="dz-title">이미지 업로드</div><div>클릭하여 파일을 선택하세요 (프로토타입 · 실제 업로드 없음)</div>';
+    }
+
+    document.querySelectorAll("#f-product .product-card").forEach(function(el){
+      el.classList.toggle("selected", el.dataset.value === formState.product);
+    });
+    populatePaywallOptions();
+
+    document.getElementById("f-priority").value = formState.priority;
+
+    updatePremiumWarning();
+    updatePriorityWarning();
+    updateFlowDiagram();
+    renderPreview();
+  }
+
+  /* ---- field listeners (attached once) ---- */
+  document.getElementById("f-name").addEventListener("input", function(){
+    formState.name = this.value;
+    clearFieldError("field-name");
+  });
+  document.getElementById("f-desc").addEventListener("input", function(){
+    formState.description = this.value;
+  });
+  document.getElementById("f-enabled").addEventListener("change", function(){
+    formState.enabled = this.checked;
+  });
+
+  document.getElementById("f-screen").addEventListener("change", function(){
+    formState.screen = this.value;
+    formState.triggerPoint = "";
+    populateTriggerPointOptions();
+    clearFieldError("field-screen");
+    clearFieldError("field-triggerPoint");
+    updatePriorityWarning();
+    updateFlowDiagram();
+  });
+  document.getElementById("f-triggerPoint").addEventListener("change", function(){
+    formState.triggerPoint = this.value;
+    clearFieldError("field-triggerPoint");
+    updateFlowDiagram();
+  });
+
+  document.getElementById("f-targetUsers").addEventListener("change", function(e){
+    if (e.target && e.target.type === "checkbox"){
+      var vals = [];
+      TARGET_USER_ORDER.forEach(function(v){
+        if (document.getElementById("tu-"+v).checked) vals.push(v);
+      });
+      formState.targetUsers = vals;
+      clearFieldError("field-targetUsers");
+      updatePremiumWarning();
+    }
+  });
+
+  document.getElementById("f-startAt").addEventListener("change", function(){
+    formState.startAt = this.value;
+    clearFieldError("field-endAt");
+  });
+  document.getElementById("endMode-set").addEventListener("change", function(){
+    formState.hasEndDate = true;
+    document.getElementById("field-endAt").style.display = "block";
+  });
+  document.getElementById("endMode-none").addEventListener("change", function(){
+    formState.hasEndDate = false;
+    formState.endAt = "";
+    document.getElementById("field-endAt").style.display = "none";
+    clearFieldError("field-endAt");
+  });
+  document.getElementById("f-endAt").addEventListener("change", function(){
+    formState.endAt = this.value;
+    clearFieldError("field-endAt");
+  });
+
+  document.getElementById("f-freqType").addEventListener("change", function(){
+    formState.freqType = this.value;
+    formState.freqValue = (formState.freqType === "first_only" || formState.freqType === "unlimited") ? null : 1;
+    populateFreqSub();
+  });
+
+  document.getElementById("f-displayType").addEventListener("click", function(e){
+    var card = e.target.closest(".card-option");
+    if (!card) return;
+    formState.displayType = card.dataset.value;
+    document.querySelectorAll("#f-displayType .card-option").forEach(function(el){
+      el.classList.toggle("selected", el === card);
+    });
+    document.getElementById("popup-content-fields").style.display = (formState.displayType === "paywall_direct") ? "none" : "block";
+    renderPreview();
+  });
+
+  document.getElementById("f-popupTitle").addEventListener("input", function(){
+    formState.popupTitle = this.value;
+    clearFieldError("field-popupTitle");
+    renderPreview();
+  });
+  document.getElementById("f-popupSubtitle").addEventListener("input", function(){
+    formState.popupSubtitle = this.value;
+    renderPreview();
+  });
+  document.getElementById("f-cta").addEventListener("input", function(){
+    formState.cta = this.value;
+    clearFieldError("field-cta");
+    renderPreview();
+  });
+  document.getElementById("f-subCta").addEventListener("input", function(){
+    formState.subCta = this.value;
+    renderPreview();
+  });
+  document.getElementById("f-popupImage").addEventListener("click", function(){
+    formState.popupImage = formState.popupImage ? null : "sample-image.png";
+    if (formState.popupImage){
+      this.classList.add("filled");
+      this.innerHTML = '<div class="dz-title">이미지 선택됨</div><div>'+escapeHtml(formState.popupImage)+' &middot; 다시 클릭하여 변경</div>';
+    } else {
+      this.classList.remove("filled");
+      this.innerHTML = '<div class="dz-title">이미지 업로드</div><div>클릭하여 파일을 선택하세요 (프로토타입 · 실제 업로드 없음)</div>';
+    }
+    renderPreview();
+  });
+
+  document.getElementById("f-product").addEventListener("click", function(e){
+    var card = e.target.closest(".product-card");
+    if (!card) return;
+    formState.product = card.dataset.value;
+    formState.paywall = "";
+    document.querySelectorAll("#f-product .product-card").forEach(function(el){
+      el.classList.toggle("selected", el === card);
+    });
+    populatePaywallOptions();
+    clearFieldError("field-product");
+    clearFieldError("field-paywall");
+    updatePremiumWarning();
+    updateFlowDiagram();
+    renderPreview();
+  });
+  document.getElementById("f-paywall").addEventListener("change", function(){
+    formState.paywall = this.value;
+    clearFieldError("field-paywall");
+    updateFlowDiagram();
+    renderPreview();
+  });
+
+  document.getElementById("f-priority").addEventListener("input", function(){
+    formState.priority = Number(this.value) || 1;
+    updatePriorityWarning();
+  });
+
+  /* ---- preview ---- */
+  function renderPreview(){
+    var screen = document.getElementById("phone-screen");
+    var typeLabelEl = document.getElementById("preview-type-label");
+    var productLabelEl = document.getElementById("preview-product-label");
+    typeLabelEl.textContent = DISPLAY_TYPE_LABELS[formState.displayType] || "-";
+    productLabelEl.textContent = formState.product || "-";
+
+    var bg = '<div class="phone-notch"></div><div class="phone-bg-app">' +
+      '<div class="fake-block"></div>' +
+      '<div class="fake-line"></div><div class="fake-line short"></div>' +
+      '<div class="fake-block"></div>' +
+    '</div>';
+
+    if (formState.displayType === "paywall_direct"){
+      var pwLabel = formState.paywall || "Paywall 선택 필요";
+      screen.innerHTML = bg + '<div class="flow-preview">' +
+        '<div class="fp-chip">Trigger 발생</div>' +
+        '<div class="fp-arrow">&darr;</div>' +
+        '<div class="fp-chip">'+escapeHtml(pwLabel)+'</div>' +
+      '</div>';
+      return;
+    }
+
+    var productBadgeHtml = formState.product ?
+      '<span class="sheet-product-badge '+(formState.product==="PREMIUM"?"badge-premium":"badge-standard")+'">'+formState.product+'</span>' : "";
+
+    var sheetClass = "sheet";
+    if (formState.displayType === "popup") sheetClass += " popup-center";
+    if (formState.displayType === "fullpage") sheetClass += " fullpage-sheet";
+
+    var title = formState.popupTitle || "타이틀을 입력해주세요";
+    var subtitle = formState.popupSubtitle;
+    var cta = formState.cta || "CTA 문구를 입력해주세요";
+    var subCta = formState.subCta;
+
+    var sheetHtml = '<div class="'+sheetClass+'">' +
+      (formState.popupImage ? '<div class="sheet-img">이미지 미리보기</div>' : '') +
+      '<div class="sheet-title">'+escapeHtml(title)+'</div>' +
+      (subtitle ? '<div class="sheet-subtitle">'+escapeHtml(subtitle)+'</div>' : '') +
+      '<div class="sheet-cta">'+escapeHtml(cta)+'</div>' +
+      (subCta ? '<div class="sheet-subcta">'+escapeHtml(subCta)+'</div>' : '') +
+      (productBadgeHtml ? '<div class="sheet-badge-row">'+productBadgeHtml+'</div>' : '') +
+    '</div>';
+
+    if (formState.displayType === "fullpage"){
+      screen.innerHTML = bg + sheetHtml;
+    } else if (formState.displayType === "bottomsheet"){
+      screen.innerHTML = bg + '<div style="position:relative;z-index:1;">' + sheetHtml + '</div>';
+    } else {
+      screen.innerHTML = bg + '<div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;height:100%;">' + sheetHtml + '</div>';
+    }
+  }
+
+  /* ---- error helpers ---- */
+  function clearFieldError(fieldId){
+    var el = document.getElementById(fieldId);
+    if (el) el.classList.remove("has-error");
+  }
+  function setFieldError(fieldId){
+    var el = document.getElementById(fieldId);
+    if (el) el.classList.add("has-error");
+  }
+  function clearAllErrors(){
+    ["field-name","field-screen","field-triggerPoint","field-targetUsers","field-endAt","field-popupTitle","field-cta","field-product","field-paywall"]
+      .forEach(clearFieldError);
+  }
+
+  function validate(){
+    var errors = [];
+    clearAllErrors();
+
+    if (!formState.name.trim()){ setFieldError("field-name"); errors.push("name"); }
+    if (!formState.screen){ setFieldError("field-screen"); errors.push("screen"); }
+    if (!formState.triggerPoint){ setFieldError("field-triggerPoint"); errors.push("triggerPoint"); }
+    if (!formState.targetUsers || formState.targetUsers.length === 0){ setFieldError("field-targetUsers"); errors.push("targetUsers"); }
+    if (!formState.product){ setFieldError("field-product"); errors.push("product"); }
+    if (!formState.paywall){ setFieldError("field-paywall"); errors.push("paywall"); }
+
+    if (formState.hasEndDate && formState.startAt && formState.endAt){
+      if (new Date(formState.endAt) <= new Date(formState.startAt)){
+        setFieldError("field-endAt"); errors.push("endAt");
+      }
+    }
+
+    if (formState.displayType !== "paywall_direct"){
+      if (!formState.popupTitle.trim()){ setFieldError("field-popupTitle"); errors.push("popupTitle"); }
+      if (!formState.cta.trim()){ setFieldError("field-cta"); errors.push("cta"); }
+    }
+
+    return errors;
+  }
+
+  document.getElementById("btn-save").addEventListener("click", function(){
+    var errors = validate();
+    if (errors.length > 0){
+      var first = document.querySelector(".field.has-error, #field-product.has-error, #field-targetUsers.has-error");
+      if (first) first.scrollIntoView({ behavior:"smooth", block:"center" });
+      return;
+    }
+
+    var payload = {
+      name: formState.name.trim(),
+      description: formState.description.trim(),
+      enabled: formState.enabled,
+      screen: formState.screen,
+      triggerPoint: formState.triggerPoint,
+      targetUsers: formState.targetUsers.slice(),
+      startAt: formState.startAt,
+      hasEndDate: formState.hasEndDate,
+      endAt: formState.hasEndDate ? formState.endAt : "",
+      freqType: formState.freqType,
+      freqValue: formState.freqValue,
+      displayType: formState.displayType,
+      popupTitle: formState.popupTitle.trim(),
+      popupSubtitle: formState.popupSubtitle.trim(),
+      popupImage: formState.popupImage,
+      cta: formState.cta.trim(),
+      subCta: formState.subCta.trim(),
+      product: formState.product,
+      paywall: formState.paywall,
+      priority: Number(formState.priority) || 1
+    };
+
+    if (editingId == null){
+      payload.id = nextId++;
+      triggers.push(payload);
+      showToast("구독 유도 트리거가 등록되었습니다.");
+    } else {
+      var idx = triggers.findIndex(function(t){ return t.id === editingId; });
+      payload.id = editingId;
+      triggers[idx] = payload;
+      showToast("변경사항이 저장되었습니다.");
+    }
+
+    refreshList();
+    showView("list");
+  });
+
+  /* ---- delete ---- */
+  document.getElementById("btn-delete").addEventListener("click", function(){
+    document.getElementById("confirmOverlay").style.display = "flex";
+  });
+  document.getElementById("confirmCancelBtn").addEventListener("click", function(){
+    document.getElementById("confirmOverlay").style.display = "none";
+  });
+  document.getElementById("confirmOkBtn").addEventListener("click", function(){
+    triggers = triggers.filter(function(t){ return t.id !== editingId; });
+    document.getElementById("confirmOverlay").style.display = "none";
+    showToast("트리거가 삭제되었습니다.");
+    refreshList();
+    showView("list");
+  });
+
+  /* ============================================================
+   * Init
+   * ============================================================ */
+  refreshList();
+  showView("list");
+})();
+</script>
+</body>
+</html>
