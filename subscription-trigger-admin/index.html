@@ -246,7 +246,7 @@
     overflow-x:auto;
     overflow-y:hidden;
   }
-  table{width:100%;min-width:1100px;border-collapse:collapse;table-layout:fixed;}
+  table{width:100%;min-width:1094px;border-collapse:collapse;table-layout:fixed;}
   thead th{
     text-align:left;
     font-size:11.5px;
@@ -278,17 +278,15 @@
     max-width:100%;
   }
   .col-id{width:44px;}
-  .col-name{width:164px;}
+  .col-name{width:184px;}
   .col-screen{width:84px;}
   .col-product{width:112px;}
-  .col-paywall{width:132px;}
+  .col-paywall{width:160px;}
   .col-target{width:122px;}
   .col-period{width:128px;}
   .col-freq{width:90px;}
-  .col-priority{width:54px;text-align:center;}
   .col-status{width:70px;}
   .col-manage{width:100px;}
-  td.col-priority{text-align:center;}
   .row-manage{display:flex;align-items:center;gap:10px;}
   .empty-row td{padding:48px 12px;text-align:center;color:var(--text-tertiary);font-size:13px;}
 
@@ -489,8 +487,6 @@
   .dropzone.filled{border-style:solid;border-color:var(--green-border);background:var(--green-bg);color:var(--green-text);}
   .dropzone .dz-title{font-weight:600;margin-bottom:3px;color:var(--text);}
   .dropzone.filled .dz-title{color:var(--green-text);}
-
-  .priority-hint{font-size:12px;color:var(--text-secondary);margin-top:6px;}
 
   /* ---------- preview ---------- */
   .preview-panel{
@@ -733,13 +729,13 @@
           <colgroup>
             <col class="col-id"><col class="col-name"><col class="col-screen">
             <col class="col-product"><col class="col-paywall"><col class="col-target">
-            <col class="col-period"><col class="col-freq"><col class="col-priority"><col class="col-status"><col class="col-manage">
+            <col class="col-period"><col class="col-freq"><col class="col-status"><col class="col-manage">
           </colgroup>
           <thead>
             <tr>
               <th class="sticky-col sticky-id">ID</th><th class="sticky-col sticky-name">트리거명</th><th>화면</th>
               <th>대상 상품</th><th>연결 Paywall</th><th>대상 유저</th><th>노출 기간</th>
-              <th>빈도</th><th>우선순위</th><th>상태</th><th class="sticky-col sticky-manage">관리</th>
+              <th>빈도</th><th>상태</th><th class="sticky-col sticky-manage">관리</th>
             </tr>
           </thead>
           <tbody id="trigger-tbody"></tbody>
@@ -965,26 +961,9 @@
             </div>
           </div>
 
-          <!-- 8. 우선순위 -->
-          <div class="section-card">
-            <div class="section-head">
-              <span class="section-num">8</span>
-              <span class="section-title">우선순위</span>
-            </div>
-            <div class="field" style="max-width:160px;margin-bottom:0;">
-              <label class="field-label">Priority</label>
-              <input type="number" id="f-priority" min="1" value="1">
-              <div class="priority-hint">동일한 시점에 여러 구독 유도 트리거를 만족한 경우 숫자가 낮은 트리거를 먼저 노출합니다. (Priority 1 &gt; Priority 2 &gt; Priority 3)</div>
-              <div class="warning-box" id="priority-warning" style="display:none;">
-                <span class="mark">주의</span>
-                <span>동일 화면에서 같은 우선순위를 사용하는 트리거가 있습니다.</span>
-              </div>
-            </div>
-          </div>
-
         </div>
 
-        <!-- 9. 미리보기 -->
+        <!-- 8. 미리보기 -->
         <div class="form-side">
           <div class="preview-panel">
             <h3>앱 노출 미리보기</h3>
@@ -1038,10 +1017,7 @@
   };
   var TARGET_USER_ORDER = ["free","standard_sub","expired"];
 
-  var PAYWALLS = {
-    STANDARD:["Standard 광고제거 Paywall","Standard 프로모션 Paywall"],
-    PREMIUM:["Premium 기본 Paywall","Premium 행운알람 Paywall","Premium 프로모션 Paywall"]
-  };
+  var PAYWALL_OPTIONS = ["Standard 광고제거 Paywall"];
 
   var FREQ_LABELS = {
     first_only:"최초 1회", daily:"일 단위", weekly:"주 단위", monthly:"월 단위",
@@ -1063,7 +1039,7 @@
       displayType:"popup",
       popupTitle:"프리미엄으로 더 많은 날씨 정보를 확인해보세요", popupSubtitle:"초정밀 예보와 프리미엄 테마를 만나보세요.",
       popupImage:null, cta:"프리미엄 시작하기", subCta:"나중에",
-      product:"PREMIUM", paywall:"Premium 기본 Paywall", priority:1
+      product:"PREMIUM", paywall:"Standard 광고제거 Paywall"
     },
     {
       id:2, name:"미니게임 재도전 광고제거 유도", description:"",
@@ -1073,7 +1049,7 @@
       displayType:"popup",
       popupTitle:"광고 없이 게임을 즐겨보세요", popupSubtitle:"STANDARD 멤버십으로 광고를 제거할 수 있어요.",
       popupImage:null, cta:"광고 없이 이용하기", subCta:"나중에",
-      product:"STANDARD", paywall:"Standard 광고제거 Paywall", priority:2
+      product:"STANDARD", paywall:"Standard 광고제거 Paywall"
     },
     {
       id:3, name:"알람 진입 프리미엄 유도", description:"",
@@ -1083,7 +1059,7 @@
       displayType:"popup",
       popupTitle:"행운을 부르는 프리미엄 알람", popupSubtitle:"매일 다른 행운 메시지를 받아보세요.",
       popupImage:null, cta:"프리미엄 알람 시작하기", subCta:"다음에",
-      product:"PREMIUM", paywall:"Premium 행운알람 Paywall", priority:1
+      product:"PREMIUM", paywall:"Standard 광고제거 Paywall"
     },
     {
       id:4, name:"알람 배경 평생소장 광고제거 유도", description:"",
@@ -1093,7 +1069,7 @@
       displayType:"popup",
       popupTitle:"광고 없이 평생 소장하세요", popupSubtitle:"STANDARD 멤버십으로 배경을 광고 없이 소장할 수 있어요.",
       popupImage:null, cta:"광고 없이 소장하기", subCta:"나중에",
-      product:"STANDARD", paywall:"Standard 광고제거 Paywall", priority:2
+      product:"STANDARD", paywall:"Standard 광고제거 Paywall"
     },
     {
       id:5, name:"미구독 회원 프리미엄 유도", description:"",
@@ -1103,17 +1079,17 @@
       displayType:"popup",
       popupTitle:"날씨돌 프리미엄을 만나보세요", popupSubtitle:"광고 제거는 물론 다양한 프리미엄 혜택을 누려보세요.",
       popupImage:null, cta:"프리미엄 알아보기", subCta:"나중에",
-      product:"PREMIUM", paywall:"Premium 기본 Paywall", priority:3
+      product:"PREMIUM", paywall:"Standard 광고제거 Paywall"
     },
     {
-      id:6, name:"행운 알람 프리미엄 프로모션", description:"가을 시즌 프로모션. 알람 화면 Priority 1과 중복 예정.",
+      id:6, name:"행운 알람 프리미엄 프로모션", description:"가을 시즌 프로모션.",
       enabled:true, screen:"알람",
       targetUsers:["free"], startAt:"2026-09-01T00:00", hasEndDate:true, endAt:"2026-09-30T23:59",
       freqType:"first_only", freqValue:null,
       displayType:"popup",
       popupTitle:"행운 알람 프리미엄 프로모션", popupSubtitle:"가을맞이 특별 혜택을 놓치지 마세요.",
       popupImage:null, cta:"지금 확인하기", subCta:"나중에",
-      product:"PREMIUM", paywall:"Premium 프로모션 Paywall", priority:1
+      product:"PREMIUM", paywall:"Standard 광고제거 Paywall"
     },
     {
       id:7, name:"가입 유도 종료 프로모션", description:"겨울 프로모션. 이미 종료됨.",
@@ -1123,7 +1099,7 @@
       displayType:"popup",
       popupTitle:"다시 만나서 반가워요", popupSubtitle:"놓친 혜택을 다시 받아보세요.",
       popupImage:null, cta:"다시 시작하기", subCta:"나중에",
-      product:"STANDARD", paywall:"Standard 프로모션 Paywall", priority:5
+      product:"STANDARD", paywall:"Standard 광고제거 Paywall"
     },
     {
       id:8, name:"마이페이지 광고제거 프로모션 테스트", description:"현재 OFF 상태로 운영 중지된 트리거 샘플.",
@@ -1133,7 +1109,7 @@
       displayType:"popup",
       popupTitle:"광고 없이 마이페이지를 이용해보세요", popupSubtitle:"STANDARD 멤버십으로 광고를 제거할 수 있어요.",
       popupImage:null, cta:"광고 없이 이용하기", subCta:"나중에",
-      product:"STANDARD", paywall:"Standard 프로모션 Paywall", priority:1
+      product:"STANDARD", paywall:"Standard 광고제거 Paywall"
     }
   ];
   var nextId = 9;
@@ -1224,7 +1200,7 @@
     var tbody = document.getElementById("trigger-tbody");
     var list = getFilteredTriggers();
     if (list.length === 0){
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="11">조건에 맞는 트리거가 없습니다.</td></tr>';
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="10">조건에 맞는 트리거가 없습니다.</td></tr>';
       return;
     }
     var rows = list.map(function(t){
@@ -1241,7 +1217,6 @@
           '<td title="'+escapeHtml(targetLabel)+'"><span class="cell-ellipsis">'+escapeHtml(targetLabel)+'</span></td>' +
           '<td><span class="cell-ellipsis">'+fmtPeriod(t)+'</span></td>' +
           '<td><span class="cell-ellipsis">'+fmtFreq(t)+'</span></td>' +
-          '<td class="col-priority">'+t.priority+'</td>' +
           '<td><span class="badge '+STATUS_BADGE_CLASS[status]+'">'+STATUS_LABEL[status]+'</span></td>' +
           '<td class="sticky-col sticky-manage">' +
             '<div class="row-manage">' +
@@ -1339,7 +1314,7 @@
       freqType:"first_only", freqValue:null,
       displayType:"popup",
       popupTitle:"", popupSubtitle:"", popupImage:null, cta:"", subCta:"",
-      product:"", paywall:"", priority:1
+      product:"", paywall:""
     };
   }
 
@@ -1353,7 +1328,7 @@
       displayType:"popup",
       popupTitle:t.popupTitle||"", popupSubtitle:t.popupSubtitle||"", popupImage:t.popupImage||null,
       cta:t.cta||"", subCta:t.subCta||"",
-      product:t.product, paywall:t.paywall, priority:t.priority
+      product:t.product, paywall:t.paywall
     };
   }
 
@@ -1388,7 +1363,6 @@
   /* ---- populate static form controls from formState ---- */
   function populatePaywallOptions(){
     var sel = document.getElementById("f-paywall");
-    var opts = formState.product ? (PAYWALLS[formState.product]||[]) : [];
     if (!formState.product){
       sel.disabled = true;
       sel.innerHTML = '<option value="">상품을 먼저 선택하세요</option>';
@@ -1396,7 +1370,7 @@
     }
     sel.disabled = false;
     sel.innerHTML = '<option value="">Paywall을 선택하세요</option>' +
-      opts.map(function(name){
+      PAYWALL_OPTIONS.map(function(name){
         var sel2 = (name === formState.paywall) ? " selected" : "";
         return '<option value="'+escapeHtml(name)+'"'+sel2+'>'+escapeHtml(name)+'</option>';
       }).join("");
@@ -1441,14 +1415,6 @@
       textEl.textContent = "이미 STANDARD 혜택을 이용 중인 사용자입니다. STANDARD 가입 유도 대상으로 설정하는 것이 맞는지 확인해주세요.";
     }
     warn.style.display = show ? "flex" : "none";
-  }
-
-  function updatePriorityWarning(){
-    var warn = document.getElementById("priority-warning");
-    var dup = triggers.some(function(t){
-      return t.id !== editingId && t.screen === formState.screen && Number(t.priority) === Number(formState.priority) && formState.screen;
-    });
-    warn.style.display = dup ? "flex" : "none";
   }
 
   function updateFlowDiagram(){
@@ -1501,10 +1467,7 @@
     });
     populatePaywallOptions();
 
-    document.getElementById("f-priority").value = formState.priority;
-
     updateSubscriberWarning();
-    updatePriorityWarning();
     updateFlowDiagram();
     renderPreview();
   }
@@ -1524,7 +1487,6 @@
   document.getElementById("f-screen").addEventListener("change", function(){
     formState.screen = this.value;
     clearFieldError("field-screen");
-    updatePriorityWarning();
     updateFlowDiagram();
   });
 
@@ -1615,11 +1577,6 @@
     clearFieldError("field-paywall");
     updateFlowDiagram();
     renderPreview();
-  });
-
-  document.getElementById("f-priority").addEventListener("input", function(){
-    formState.priority = Number(this.value) || 1;
-    updatePriorityWarning();
   });
 
   /* ---- preview ---- */
@@ -1716,8 +1673,7 @@
       cta: formState.cta.trim(),
       subCta: formState.subCta.trim(),
       product: formState.product,
-      paywall: formState.paywall,
-      priority: Number(formState.priority) || 1
+      paywall: formState.paywall
     };
 
     if (editingId == null){
