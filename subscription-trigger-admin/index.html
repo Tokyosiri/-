@@ -564,6 +564,10 @@
     font-size:11.5px;
     color:var(--text-tertiary);
   }
+  .sheet-subcta-tag{
+    color:var(--primary);
+    font-weight:600;
+  }
   .preview-meta{
     margin-top:14px;
     font-size:11.5px;
@@ -921,6 +925,15 @@
                   <input type="text" id="f-subCta" placeholder="나중에">
                 </div>
               </div>
+              <div class="field" style="margin-bottom:0;">
+                <label class="field-label">보조 CTA 동작</label>
+                <select id="f-subCtaAction" disabled>
+                  <option value="dismiss_only">팝업 닫기</option>
+                  <option value="dismiss_then_ad">팝업 닫기 + 광고 노출</option>
+                  <option value="dismiss_then_back">팝업 닫기 + 이전 화면으로 이동</option>
+                </select>
+                <div class="helper">사용자가 보조 CTA를 탭했을 때 실행할 동작입니다. 개발에서 지원하는 동작만 선택할 수 있습니다.</div>
+              </div>
             </div>
           </div>
 
@@ -1012,6 +1025,12 @@
 
   var PAYWALL_OPTIONS = ["Standard 광고제거 Paywall"];
 
+  var SUBCTA_ACTION_LABELS = {
+    dismiss_only:"팝업 닫기",
+    dismiss_then_ad:"팝업 닫기 + 광고 노출",
+    dismiss_then_back:"팝업 닫기 + 이전 화면으로 이동"
+  };
+
   var FREQ_LABELS = {
     first_only:"최초 1회", daily:"일 단위", weekly:"주 단위", monthly:"월 단위",
     last_n_days:"마지막 노출 후 N일", unlimited:"제한 없음"
@@ -1031,7 +1050,7 @@
       freqType:"first_only", freqValue:null,
       displayType:"popup",
       popupTitle:"프리미엄으로 더 많은 날씨 정보를 확인해보세요", popupSubtitle:"초정밀 예보와 프리미엄 테마를 만나보세요.",
-      popupImage:null, cta:"프리미엄 시작하기", subCta:"나중에",
+      popupImage:null, cta:"프리미엄 시작하기", subCta:"나중에", subCtaAction:"dismiss_only",
       product:"PREMIUM", paywall:"Standard 광고제거 Paywall"
     },
     {
@@ -1041,7 +1060,7 @@
       freqType:"last_n_days", freqValue:3,
       displayType:"popup",
       popupTitle:"광고 없이 게임을 즐겨보세요", popupSubtitle:"STANDARD 멤버십으로 광고를 제거할 수 있어요.",
-      popupImage:null, cta:"광고 없이 이용하기", subCta:"나중에",
+      popupImage:null, cta:"광고 없이 이용하기", subCta:"나중에", subCtaAction:"dismiss_then_ad",
       product:"STANDARD", paywall:"Standard 광고제거 Paywall"
     },
     {
@@ -1051,7 +1070,7 @@
       freqType:"first_only", freqValue:null,
       displayType:"popup",
       popupTitle:"행운을 부르는 프리미엄 알람", popupSubtitle:"매일 다른 행운 메시지를 받아보세요.",
-      popupImage:null, cta:"프리미엄 알람 시작하기", subCta:"다음에",
+      popupImage:null, cta:"프리미엄 알람 시작하기", subCta:"다음에", subCtaAction:"dismiss_only",
       product:"PREMIUM", paywall:"Standard 광고제거 Paywall"
     },
     {
@@ -1061,7 +1080,7 @@
       freqType:"last_n_days", freqValue:2,
       displayType:"popup",
       popupTitle:"광고 없이 평생 소장하세요", popupSubtitle:"STANDARD 멤버십으로 배경을 광고 없이 소장할 수 있어요.",
-      popupImage:null, cta:"광고 없이 소장하기", subCta:"나중에",
+      popupImage:null, cta:"광고 없이 소장하기", subCta:"나중에", subCtaAction:"dismiss_then_ad",
       product:"STANDARD", paywall:"Standard 광고제거 Paywall"
     },
     {
@@ -1071,7 +1090,7 @@
       freqType:"last_n_days", freqValue:3,
       displayType:"popup",
       popupTitle:"날씨돌 프리미엄을 만나보세요", popupSubtitle:"광고 제거는 물론 다양한 프리미엄 혜택을 누려보세요.",
-      popupImage:null, cta:"프리미엄 알아보기", subCta:"나중에",
+      popupImage:null, cta:"프리미엄 알아보기", subCta:"나중에", subCtaAction:"dismiss_only",
       product:"PREMIUM", paywall:"Standard 광고제거 Paywall"
     },
     {
@@ -1081,7 +1100,7 @@
       freqType:"first_only", freqValue:null,
       displayType:"popup",
       popupTitle:"행운 알람 프리미엄 프로모션", popupSubtitle:"가을맞이 특별 혜택을 놓치지 마세요.",
-      popupImage:null, cta:"지금 확인하기", subCta:"나중에",
+      popupImage:null, cta:"지금 확인하기", subCta:"나중에", subCtaAction:"dismiss_only",
       product:"PREMIUM", paywall:"Standard 광고제거 Paywall"
     },
     {
@@ -1091,7 +1110,7 @@
       freqType:"last_n_days", freqValue:7,
       displayType:"popup",
       popupTitle:"다시 만나서 반가워요", popupSubtitle:"놓친 혜택을 다시 받아보세요.",
-      popupImage:null, cta:"다시 시작하기", subCta:"나중에",
+      popupImage:null, cta:"다시 시작하기", subCta:"나중에", subCtaAction:"dismiss_only",
       product:"STANDARD", paywall:"Standard 광고제거 Paywall"
     },
     {
@@ -1101,7 +1120,7 @@
       freqType:"unlimited", freqValue:null,
       displayType:"popup",
       popupTitle:"광고 없이 마이페이지를 이용해보세요", popupSubtitle:"STANDARD 멤버십으로 광고를 제거할 수 있어요.",
-      popupImage:null, cta:"광고 없이 이용하기", subCta:"나중에",
+      popupImage:null, cta:"광고 없이 이용하기", subCta:"나중에", subCtaAction:"dismiss_then_back",
       product:"STANDARD", paywall:"Standard 광고제거 Paywall"
     }
   ];
@@ -1306,7 +1325,7 @@
       startAt:startAt, hasEndDate:true, endAt:"",
       freqType:"first_only", freqValue:null,
       displayType:"popup",
-      popupTitle:"", popupSubtitle:"", popupImage:null, cta:"", subCta:"",
+      popupTitle:"", popupSubtitle:"", popupImage:null, cta:"", subCta:"", subCtaAction:"dismiss_only",
       product:"", paywall:""
     };
   }
@@ -1320,7 +1339,7 @@
       freqType:t.freqType, freqValue:t.freqValue,
       displayType:"popup",
       popupTitle:t.popupTitle||"", popupSubtitle:t.popupSubtitle||"", popupImage:t.popupImage||null,
-      cta:t.cta||"", subCta:t.subCta||"",
+      cta:t.cta||"", subCta:t.subCta||"", subCtaAction:t.subCtaAction||"dismiss_only",
       product:t.product, paywall:t.paywall
     };
   }
@@ -1446,6 +1465,8 @@
     document.getElementById("f-popupSubtitle").value = formState.popupSubtitle;
     document.getElementById("f-cta").value = formState.cta;
     document.getElementById("f-subCta").value = formState.subCta;
+    document.getElementById("f-subCtaAction").value = formState.subCtaAction;
+    document.getElementById("f-subCtaAction").disabled = !formState.subCta.trim();
     var dz = document.getElementById("f-popupImage");
     if (formState.popupImage){
       dz.classList.add("filled");
@@ -1536,6 +1557,11 @@
   });
   document.getElementById("f-subCta").addEventListener("input", function(){
     formState.subCta = this.value;
+    document.getElementById("f-subCtaAction").disabled = !this.value.trim();
+    renderPreview();
+  });
+  document.getElementById("f-subCtaAction").addEventListener("change", function(){
+    formState.subCtaAction = this.value;
     renderPreview();
   });
   document.getElementById("f-popupImage").addEventListener("click", function(){
@@ -1588,13 +1614,15 @@
     var subtitle = formState.popupSubtitle;
     var cta = formState.cta || "CTA 문구를 입력해주세요";
     var subCta = formState.subCta;
+    var subCtaTag = (subCta && formState.subCtaAction !== "dismiss_only") ?
+      '<span class="sheet-subcta-tag"> · '+escapeHtml(SUBCTA_ACTION_LABELS[formState.subCtaAction] || "")+'</span>' : "";
 
     var sheetHtml = '<div class="sheet">' +
       (formState.popupImage ? '<div class="sheet-img">이미지 미리보기</div>' : '') +
       '<div class="sheet-title">'+escapeHtml(title)+'</div>' +
       (subtitle ? '<div class="sheet-subtitle">'+escapeHtml(subtitle)+'</div>' : '') +
       '<div class="sheet-cta">'+escapeHtml(cta)+'</div>' +
-      (subCta ? '<div class="sheet-subcta">'+escapeHtml(subCta)+'</div>' : '') +
+      (subCta ? '<div class="sheet-subcta">'+escapeHtml(subCta)+subCtaTag+'</div>' : '') +
     '</div>';
 
     screen.innerHTML = bg + '<div style="position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;height:100%;">' + sheetHtml + '</div>';
@@ -1661,6 +1689,7 @@
       popupImage: formState.popupImage,
       cta: formState.cta.trim(),
       subCta: formState.subCta.trim(),
+      subCtaAction: formState.subCtaAction,
       product: formState.product,
       paywall: formState.paywall
     };
